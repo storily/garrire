@@ -1,0 +1,51 @@
+language: rust
+rust: stable
+dist: xenial
+
+cache:
+  - directories:
+    - $HOME/.rustup
+    - target/release/deps
+    - target/$TARGET/release/deps
+
+addons:
+  apt:
+    packages:
+      - fakeroot
+      - musl-dev
+      - musl-tools
+
+env:
+  global:
+    - PROJECT_NAME=garrire
+
+matrix:
+  include:
+    - os: windows
+      env: TARGET=x86_64-pc-windows-msvc PATH="$PATH:/c/Program Files/PostgreSQL/10/bin"
+    - os: osx
+      env: TARGET=x86_64-apple-darwin
+    - os: linux
+      env: TARGET=x86_64-unknown-linux-gnu
+    - os: linux
+      env: TARGET=x86_64-unknown-linux-musl
+
+before_script:
+  - choco install postgresql10 --yes --params '/Password:postgres' || true
+  - rustup target add $TARGET || true
+
+script:
+  - cargo check --release --target $TARGET
+
+before_deploy: ./.package $TRAVIS_TAG $TARGET
+deploy:
+  provider: releases
+  api_key:
+    secure: fillmein
+  file_glob: true
+  file: ${PROJECT_NAME}-${TRAVIS_TAG}-${TARGET}.*
+  skip_cleanup: true
+  on:
+    repo: passcod/garrire
+    tags: true
+    rust: stable

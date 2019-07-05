@@ -1,0 +1,46 @@
+## Turn on debug log messages. This has a stronger effect than using
+## RUST_LOG=garrire=debug, as some features are only enabled in debug mode.
+## Default: false
+# debug = true
+
+[database]
+
+## The URL/DSN for the database.
+## Required.
+url = "postgres://localhost/garrire"
+
+[discord]
+
+## The Discord bot token
+## Required.
+token = ""
+
+## The command prefix for the bot.
+## Default: "!"
+# prefix = "~"
+
+## Enabled commands. Some commands depend on others, and enabling one will
+## enable dependencies. The below listing of commands may not be exhaustive;
+## refer to src/commands.rs for a definitive list, or to the README/website.
+## If this setting is empty, all commands are enabled.
+# Default: []
+# commands = ["ping", "choose", "pick", "dice"]
+
+### Available commands:
+###
+### - ping = Test command that replies what you tell it
+### - choose = Chooses between some choices randomly
+### - pick = Picks a random number between given bounds
+### - dice = Rolls one or more dice
+
+[language]
+
+## Default locale, this is what the bot will speak primarily.
+## Default: "en-NZ"
+# default = "mi-NZ"
+
+## Alternate locales, this is what users can select in their preferences as to
+## which language the bot uses when talking to or about them, and also is what
+## the bot will sometimes spontaneously speak when confused or being sassy.
+# Default: ["mi-NZ"]
+# alternates = ["en-NZ"]

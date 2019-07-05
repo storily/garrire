@@ -1,0 +1,35 @@
+[package]
+name = "garrīre"
+version = "0.1.0"
+authors = ["Félix Saparelli <felix@passcod.name>"]
+edition = "2018"
+
+[dependencies]
+chrono = "0.4.7"
+runtime = "0.3.0-alpha.6"
+serde = "1.0.94"
+log = "0.4.6"
+env_logger = "0.6.2"
+rand = "0.7.0"
+walkdir = "2.2.8"
+
+[dependencies.config]
+version = "0.9.3"
+features = ["toml"]
+
+[dependencies.diesel]
+version = "1.4.2"
+features = ["chrono", "postgres", "r2d2"]
+
+[dependencies.fluent]
+git = "https://github.com/projectfluent/fluent-rs"
+
+[dependencies.fluent-resmgr]
+git = "https://github.com/projectfluent/fluent-rs"
+
+[dependencies.rhai]
+git = "https://github.com/jonathandturner/rhai"
+
+[dependencies.serenity]
+version = "0.6.2"
+features = ["voice"]
