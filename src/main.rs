@@ -1,13 +1,16 @@
-#![feature(async_await)]
+#[macro_use]
+extern crate rust_embed;
 
-use log::info;
+pub(crate) use fluent::FluentValue;
+pub(crate) use locale::Locale;
+use log::{error, info};
 
 mod commands;
 mod handler;
+mod locale;
 mod settings;
 
-#[runtime::main]
-async fn main() {
+fn main() {
     use settings::Settings;
 
     #[cfg(debug_assertions)]
@@ -19,10 +22,8 @@ async fn main() {
     settings.logging();
 
     info!("Loading language...");
-    let langmgr = settings.language.resource_manager();
-    let lang = settings.language.bundle(&langmgr);
-    dbg!(lang.format("hello-world", None));
-    //mgr.get_bundle((), ());
+    let loc = locale::Locale::new(&["main"]);
+    dbg!(loc.simple("hello-world", None));
 
     info!("Connecting to database...");
     let pool = settings.database.connect();
@@ -33,8 +34,8 @@ async fn main() {
     info!("Selecting commands...");
     client.with_framework(settings.discord.framework());
 
-    // info!("Starting up...");
-    // if let Err(why) = client.start() {
-    //     error!("Err with client: {:?}", why);
-    // }
+    info!("Starting up...");
+    if let Err(why) = client.start() {
+        error!("Err with client: {:?}", why);
+    }
 }

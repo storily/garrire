@@ -1,17 +1,33 @@
 [package]
 name = "garrīre"
 version = "0.1.0"
-authors = ["Félix Saparelli <felix@passcod.name>"]
 edition = "2018"
+
+publish = false
+
+authors = ["Félix Saparelli <felix@passcod.name>"]
+description = "Sassy discord bot"
+homepage = "https://github.com/storily/garrire"
+license = "Artistic-2.0"
+readme = "README.md"
+repository = "https://github.com/storily/garrire"
+
+[badges]
+travis-ci = { repository = "storily/garrire", branch = "main" }
+maintenance = { status = "actively-developed" }
+
+[profile.release]
+lto = true
 
 [dependencies]
 chrono = "0.4.7"
-runtime = "0.3.0-alpha.6"
+fluent = "0.6.0"
 serde = "1.0.94"
 log = "0.4.6"
 env_logger = "0.6.2"
 rand = "0.7.0"
 walkdir = "2.2.8"
+lazy_static = "1.3.0"
 
 [dependencies.config]
 version = "0.9.3"
@@ -21,14 +37,11 @@ features = ["toml"]
 version = "1.4.2"
 features = ["chrono", "postgres", "r2d2"]
 
-[dependencies.fluent]
-git = "https://github.com/projectfluent/fluent-rs"
+[dependencies.rust-embed]
+git = "https://github.com/pyros2097/rust-embed"
 
-[dependencies.fluent-resmgr]
-git = "https://github.com/projectfluent/fluent-rs"
-
-[dependencies.rhai]
-git = "https://github.com/jonathandturner/rhai"
+[dependencies.rust-embed-utils]
+git = "https://github.com/pyros2097/rust-embed"
 
 [dependencies.serenity]
 version = "0.6.2"

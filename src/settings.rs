@@ -1,12 +1,11 @@
 use diesel::r2d2::{ConnectionManager, ManageConnection, Pool};
 use diesel::PgConnection;
-use fluent::FluentBundle;
-use fluent_resmgr::resource_manager::ResourceManager;
 use log::{error, info};
 use serde::Deserialize;
 use serenity::client::Client;
 use serenity::framework::StandardFramework;
-use std::path::PathBuf;
+use std::collections::HashMap;
+use std::sync::Arc;
 
 use crate::handler::Handler;
 
@@ -76,87 +75,61 @@ impl Discord {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Language {
-    #[serde(default = "Language::default_path")]
-    pub path: PathBuf,
-
+pub struct Locale {
     /// Locale to use as the default
-    #[serde(default = "Language::default_lang")]
+    #[serde(default = "Locale::default_lang")]
     pub default: String,
 
-    /// Locales to use as alternates
-    #[serde(default = "Vec::new")]
-    pub alternates: Vec<String>,
+    /// Default glitchiness
+    ///
+    /// By default garrīre has a locale glitch 1% of the time. A locale glitch
+    /// is when the bot answers in a different language than expected, which is
+    /// pulled from the "rest of available locales" than requested.
+    ///
+    /// With this setting, the frequency can be adjusted, or glitchiness can be
+    /// turned off completely (value at or below zero). A value of 1.0 or more
+    /// is 100% locale glitchiness.
+    #[serde(default = "Locale::default_glitch")]
+    pub glitchiness: f64,
+
+    /// Custom fallback chains
+    ///
+    /// By default locales fall back to the default if a resource or item is
+    /// missing. In this setting, more advanced fallback chains can be defined.
+    /// Fallback chains also affect date/time formatting.
+    ///
+    /// # Examples
+    ///
+    /// ```text
+    /// [locale.fallbacks]
+    /// "en-PIRATE": ["en-MIDDLE", "en-UK", "en-NZ"]
+    /// "pt-BR": ["pt-PT"]
+    /// "mi-NZ": []
+    /// ```
+    ///
+    /// Here, Pirate English falls back to Middle English first, then to UK
+    /// English, and finally to New Zealand English. Brazillian Portuguese only
+    /// falls back to (European) Portuguese. And Te Reo Māori has no fallback.
+    #[serde(default = "HashMap::new")]
+    pub fallbacks: HashMap<String, Vec<String>>,
 }
 
-impl Language {
-    fn default_path() -> PathBuf {
-        if cfg!(debug_assertions) {
-            "./lang"
-        } else {
-            "/usr/share/garrire/lang"
-        }
-        .into()
-    }
-
+impl Locale {
     fn default_lang() -> String {
         "en-NZ".into()
     }
 
-    pub fn resource_manager(&self) -> ResourceManager {
-        ResourceManager::new(
-            self.path
-                .join("{locale}/{res_id}")
-                .to_string_lossy()
-                .to_string(),
-        )
-    }
-
-    pub fn resources(&self) -> Vec<String> {
-        use std::collections::HashSet;
-
-        fn is_hidden(entry: &walkdir::DirEntry) -> bool {
-            entry
-                .file_name()
-                .to_str()
-                .map(|s| s.starts_with("."))
-                .unwrap_or(false)
-        }
-
-        walkdir::WalkDir::new(&self.path)
-            .into_iter()
-            .filter_entry(|e| !is_hidden(e))
-            .filter_map(|e| e.ok().map(|f| f.file_name().to_os_string()))
-            .filter_map(|f| {
-                PathBuf::from(&f)
-                    .extension()
-                    .map(|s| s == "ftl")
-                    .and(f.into_string().ok())
-            })
-            .collect::<HashSet<String>>()
-            .into_iter()
-            .collect()
-    }
-
-    pub fn bundle<'r>(&self, mgr: &'r ResourceManager) -> FluentBundle<'r> {
-        self.bundle_for(mgr, &self.default)
-    }
-
-    pub fn bundle_for<'r>(&self, mgr: &'r ResourceManager, lang: &str) -> FluentBundle<'r> {
-        let mut locales = self.alternates.clone();
-        locales.push(self.default.clone());
-        dbg!(&locales);
-
-        mgr.get_bundle(locales, self.resources())
+    const fn default_glitch() -> f64 {
+        0.01
     }
 }
 
-impl Default for Language {
+impl Default for Locale {
     fn default() -> Self {
         Self {
-            path: Self::default_path(),
-            default: "en-NZ".into(),
-            alternates: Vec::new(),
+            default: Self::default_lang(),
+            glitchiness: Self::default_glitch(),
+            fallbacks: HashMap::new(),
         }
     }
 }
@@ -167,21 +140,28 @@ pub struct Settings {
     pub debug: bool,
 
     #[serde(default)]
-    pub language: Language,
+    pub locale: Locale,
 
     pub database: Database,
     pub discord: Discord,
 }
 
 impl Settings {
-    pub fn load() -> Self {
-        let mut settings = config::Config::default();
-        settings
-            .merge(config::File::with_name("Settings"))
-            .unwrap()
-            .merge(config::Environment::with_prefix("GARRIRE"))
-            .unwrap();
-        settings.try_into::<Settings>().unwrap()
+    pub fn load() -> Arc<Self> {
+        lazy_static::lazy_static! {
+            pub static ref SETTINGS: Arc<Settings> = {
+                let mut settings = config::Config::default();
+                settings
+                .merge(config::File::with_name("Settings"))
+                .unwrap()
+                .merge(config::Environment::with_prefix("GARRIRE"))
+                .unwrap();
+
+                Arc::new(settings.try_into::<Settings>().unwrap())
+            };
+        }
+
+        SETTINGS.clone()
     }
 
     pub fn logging(&self) {
