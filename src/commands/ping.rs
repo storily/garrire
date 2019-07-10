@@ -1,4 +1,4 @@
-use crate::{FluentValue, Locale};
+use crate::{locale_args, Locale};
 use serenity::client::Context;
 use serenity::framework::standard::{
     macros::{command, group},
@@ -18,12 +18,9 @@ fn ping(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         &ctx.http,
         Locale::new(&["main"]).simple(
             "pong",
-            Some(
-                &vec![("message", FluentValue::from(args.message()))]
-                    .iter()
-                    .cloned()
-                    .collect(),
-            ),
+            Some(&locale_args! {
+                "message" => args.message()
+            }),
         ),
     )?;
     Ok(())

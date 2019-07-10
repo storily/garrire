@@ -4,7 +4,7 @@ use rand::Rng;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use crate::settings::Settings;
+use crate::Settings;
 
 #[derive(RustEmbed)]
 #[folder = "locale/"]
@@ -12,13 +12,18 @@ struct LocaleAsset;
 
 lazy_static::lazy_static! {
     static ref AVAILABLE_LOCALES: Vec<String> = {
-        let locs = LocaleAsset::iter().filter_map(|filename| {
+        let mut locs = LocaleAsset::iter().filter_map(|filename| {
             let path = PathBuf::from(filename.to_string());
             path.iter().next().map(|s| s.to_owned())
         }).collect::<std::collections::HashSet<std::ffi::OsString>>()
         .into_iter()
         .map(|s| s.to_string_lossy().to_string())
         .collect::<Vec<String>>();
+
+        // The none locale is useful for special cases when purely-random locale
+        // selection is needed. It is also hard-coded to fallback to no other
+        // locale, while falling back to the default locale for dates/times.
+        locs.push("none".into());
 
         let default = &Settings::load().locale.default;
         if ! locs.iter().any(|loc| loc == default) {
@@ -41,9 +46,21 @@ lazy_static::lazy_static! {
 }
 
 pub struct Locale {
+    /// L10n resources this instance draws from.
     resources: Vec<String>,
+
+    /// Locale it will use, and derive the fallbacks from. This can be any
+    /// string and will be matched against the available (embedded) files.
     locale: String,
+
+    /// Fallback chain used for date/times. Unlike language fallbacks, this
+    /// remains constant for the particular root locale, such that the date/time
+    /// formats of the preferred language are used even if the language isn't.
     chain: Vec<String>,
+
+    /// Glitchiness factor. When positive, all calls to the `Locale` have a
+    /// chance (0.0 to 1.0, defaults to 0.01) to use a completely different
+    /// language instead. Surprise!
     glitchiness: f64,
 }
 
@@ -64,6 +81,11 @@ pub type Args<'args> = HashMap<&'args str, FluentValue>;
 fn fallback_chain(root: &String) -> Vec<String> {
     let settings = &Settings::load().locale;
     let mut chain = vec![root.clone()];
+
+    if root == &"none" {
+        return chain;
+    }
+
     if let Some(fallback) = settings.fallbacks.get(root) {
         for fall in fallback {
             chain.push(fall.clone());
@@ -101,7 +123,7 @@ fn actual_locale(requested: String, can_use_this: bool) -> Option<String> {
 }
 
 fn random_other_locale(this: &String) -> String {
-    let others: Vec<&String> = AVAILABLE_LOCALES.iter().filter(|l| l != &this).collect();
+    let others: Vec<&String> = AVAILABLE_LOCALES.iter().filter(|l| l != &this && l != &"none").collect();
     debug!("Random locale :: This: {}, Others: {:?}", this, others);
     if others.is_empty() {
         this
@@ -132,6 +154,10 @@ fn actual_locale_hard(requested_locale: String, can_use_this: bool) -> String {
 impl Locale {
     pub fn new(requested_resources: &[&str]) -> Self {
         Self::with_locale(requested_resources, Settings::load().locale.default.clone())
+    }
+
+    pub fn glitchy(requested_resources: &[&str]) -> Self {
+        Self::with_locale(requested_resources, "none".into()).glitchiness(1)
     }
 
     pub fn with_locale(requested_resources: &[&str], requested_locale: String) -> Self {
@@ -166,9 +192,15 @@ impl Locale {
         }
     }
 
-    fn get(&self, name: &str, args: Option<&Args>, alternate: Option<fn(&str) -> bool>) -> String {
+    fn get(&self, name: &str, args: Option<&Args>, alternate: Option<fn(&str, &str) -> bool>) -> String {
+        debug!("Getting localisation for {} with args: {:?}{}", name, args, match alternate {
+            Some(_) => " and a selector",
+            None => ""
+        });
+
         if self.glitch() {
             let locale = random_other_locale(&self.locale);
+            debug!("Glitching to another locale: {}", locale);
             let chain = fallback_chain(&locale);
             return Self {
                 resources: self.resources.clone(),
@@ -198,6 +230,7 @@ impl Locale {
                     )),
                 );
             } else {
+                debug!("No matching asset for resource {}, falling back", asset);
                 return self.fallback().get(name, args, alternate);
             }
         }
@@ -210,12 +243,55 @@ impl Locale {
         }
 
         // TODO: handle alternates
+        let selected_name = if let Some(selector) = alternate {
+            let mut prefix = name.to_string();
+            prefix.push('-');
+            let prelen = prefix.len();
+            debug!("Selecting an alternate for {}*", prefix);
 
-        if let Some((message, partial_error)) = bundle.format(name, args) {
+            let entries = bundle.entries.iter().filter_map(|(key, entry)| {
+                if let fluent_bundle::entry::Entry::Message(_) = entry {
+                    if key.starts_with(&prefix) {
+                        return Some(key.split_at(prelen).1);
+                    }
+                }
+
+                None
+            }).collect::<Vec<&str>>();
+
+            if entries.is_empty() {
+                debug!("No matching entries for {}* alternates, falling back", prefix);
+                return self.fallback().get(name, args, alternate);
+            } else {
+                let selected = entries.iter().filter(
+                    |suffix| selector(name, suffix)
+                ).collect::<Vec<&&str>>();
+
+                prefix.insert_str(prelen, match selected.len() {
+                    0 => {
+                        error!("Selector for {} returned no results! This is a bug, please report it! Falling back to random.", name);
+                        entries[rand::thread_rng().gen_range(0, entries.len() - 1)]
+                    },
+                    1 => {
+                        debug!("One result for selector, good");
+                        selected[0]
+                    },
+                    _ => {
+                        debug!("> 1 results for selector, selecting at random");
+                        selected[rand::thread_rng().gen_range(0, selected.len() - 1)]
+                    }
+                });
+                prefix
+            }
+        } else {
+            name.to_string()
+        };
+
+        if let Some((message, partial_error)) = bundle.format(&selected_name, args) {
             if !partial_error.is_empty() {
                 error!(
                     "Partial error(s) while formatting message {} with args {:?}:",
-                    name, args
+                    selected_name, args
                 );
             }
 
@@ -225,6 +301,7 @@ impl Locale {
 
             message.to_string()
         } else {
+            debug!("Bundle couldn’t find the message for {}, falling back", selected_name);
             self.fallback().get(name, args, alternate)
         }
     }
@@ -233,16 +310,19 @@ impl Locale {
         self.get(name, args, None)
     }
 
-    pub fn alternate(&self, name: &str, args: Option<&Args>, selector: fn(&str) -> bool) -> String {
+    pub fn alternate(&self, name: &str, args: Option<&Args>, selector: fn(&str, &str) -> bool) -> String {
         self.get(name, args, Some(selector))
     }
 
     pub fn random(&self, name: &str, args: Option<&Args>) -> String {
-        self.get(name, args, Some(|_| rand::thread_rng().gen()))
+        // Because internally we choose at random if the selector filters off
+        // into more than one result, we can just return true for everything
+        // instead of choosing randomly twice.
+        self.get(name, args, Some(|_, _| true))
     }
 
-    pub fn glitchiness(mut self, frequency: f64) -> Self {
-        self.glitchiness = frequency;
+    pub fn glitchiness<N>(mut self, frequency: N) -> Self where N: Into<f64> {
+        self.glitchiness = frequency.into();
         self
     }
 
@@ -255,4 +335,15 @@ impl Locale {
             false
         }
     }
+}
+
+#[macro_export]
+macro_rules! locale_args {
+    ($($key:expr => $value:expr),*) => {{
+        let mut args: crate::locale::Args = ::std::collections::HashMap::new();
+        $(
+            args.insert($key, ::fluent::FluentValue::from($value));
+        )*
+        args
+    }}
 }
