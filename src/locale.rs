@@ -123,7 +123,10 @@ fn actual_locale(requested: String, can_use_this: bool) -> Option<String> {
 }
 
 fn random_other_locale(this: &String) -> String {
-    let others: Vec<&String> = AVAILABLE_LOCALES.iter().filter(|l| l != &this && l != &"none").collect();
+    let others: Vec<&String> = AVAILABLE_LOCALES
+        .iter()
+        .filter(|l| l != &this && l != &"none")
+        .collect();
     debug!("Random locale :: This: {}, Others: {:?}", this, others);
     if others.is_empty() {
         this
@@ -192,11 +195,21 @@ impl Locale {
         }
     }
 
-    fn get(&self, name: &str, args: Option<&Args>, alternate: Option<fn(&str, &str) -> bool>) -> String {
-        debug!("Getting localisation for {} with args: {:?}{}", name, args, match alternate {
-            Some(_) => " and a selector",
-            None => ""
-        });
+    fn get(
+        &self,
+        name: &str,
+        args: Option<&Args>,
+        alternate: Option<fn(&str, &str) -> bool>,
+    ) -> String {
+        debug!(
+            "Getting localisation for {} with args: {:?}{}",
+            name,
+            args,
+            match alternate {
+                Some(_) => " and a selector",
+                None => "",
+            }
+        );
 
         if self.glitch() {
             let locale = random_other_locale(&self.locale);
@@ -249,23 +262,31 @@ impl Locale {
             let prelen = prefix.len();
             debug!("Selecting an alternate for {}*", prefix);
 
-            let entries = bundle.entries.iter().filter_map(|(key, entry)| {
-                if let fluent_bundle::entry::Entry::Message(_) = entry {
-                    if key.starts_with(&prefix) {
-                        return Some(key.split_at(prelen).1);
+            let entries = bundle
+                .entries
+                .iter()
+                .filter_map(|(key, entry)| {
+                    if let fluent_bundle::entry::Entry::Message(_) = entry {
+                        if key.starts_with(&prefix) {
+                            return Some(key.split_at(prelen).1);
+                        }
                     }
-                }
 
-                None
-            }).collect::<Vec<&str>>();
+                    None
+                })
+                .collect::<Vec<&str>>();
 
             if entries.is_empty() {
-                debug!("No matching entries for {}* alternates, falling back", prefix);
+                debug!(
+                    "No matching entries for {}* alternates, falling back",
+                    prefix
+                );
                 return self.fallback().get(name, args, alternate);
             } else {
-                let selected = entries.iter().filter(
-                    |suffix| selector(name, suffix)
-                ).collect::<Vec<&&str>>();
+                let selected = entries
+                    .iter()
+                    .filter(|suffix| selector(name, suffix))
+                    .collect::<Vec<&&str>>();
 
                 prefix.insert_str(prelen, match selected.len() {
                     0 => {
@@ -301,7 +322,10 @@ impl Locale {
 
             message.to_string()
         } else {
-            debug!("Bundle couldn’t find the message for {}, falling back", selected_name);
+            debug!(
+                "Bundle couldn’t find the message for {}, falling back",
+                selected_name
+            );
             self.fallback().get(name, args, alternate)
         }
     }
@@ -310,7 +334,12 @@ impl Locale {
         self.get(name, args, None)
     }
 
-    pub fn alternate(&self, name: &str, args: Option<&Args>, selector: fn(&str, &str) -> bool) -> String {
+    pub fn alternate(
+        &self,
+        name: &str,
+        args: Option<&Args>,
+        selector: fn(&str, &str) -> bool,
+    ) -> String {
         self.get(name, args, Some(selector))
     }
 
@@ -321,7 +350,10 @@ impl Locale {
         self.get(name, args, Some(|_, _| true))
     }
 
-    pub fn glitchiness<N>(mut self, frequency: N) -> Self where N: Into<f64> {
+    pub fn glitchiness<N>(mut self, frequency: N) -> Self
+    where
+        N: Into<f64>,
+    {
         self.glitchiness = frequency.into();
         self
     }

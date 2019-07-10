@@ -2,8 +2,8 @@
 extern crate rust_embed;
 
 pub(crate) use locale::Locale;
-pub(crate) use settings::Settings;
 use log::{error, info};
+pub(crate) use settings::Settings;
 
 mod commands;
 mod handler;

@@ -4,6 +4,8 @@ use serenity::client::{Context, EventHandler};
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 
+use crate::Settings;
+
 pub struct Handler<M>
 where
     M: ManageConnection,
@@ -15,7 +17,11 @@ impl<M> EventHandler for Handler<M>
 where
     M: ManageConnection,
 {
-    fn ready(&self, _ctx: Context, _: Ready) {
+    fn ready(&self, ctx: Context, _: Ready) {
+        if let Some(act) = Settings::load().new_activity() {
+            ctx.set_activity(act);
+        }
+
         info!("Ready and able!\n");
     }
 

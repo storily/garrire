@@ -4,6 +4,7 @@ use log::{error, info};
 use serde::Deserialize;
 use serenity::client::Client;
 use serenity::framework::StandardFramework;
+use serenity::model::gateway::Activity as DiscAct;
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -135,9 +136,31 @@ impl Default for Locale {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(kebab-case)]
+pub enum Activity {
+    Playing(String),
+    Listening(String),
+    Streaming(String),
+    Random,
+    Leave,
+}
+
+impl Default for Activity {
+    fn default() -> Self {
+        Activity::Random
+    }
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Settings {
     #[serde(default)]
     pub debug: bool,
+
+    #[serde(default)]
+    pub activity: Activity,
+
+    #[serde(default = "Settings::default_streaming_url")]
+    pub streaming_url: String,
 
     #[serde(default)]
     pub locale: Locale,
@@ -175,5 +198,35 @@ impl Settings {
             },
         );
         logs.init();
+    }
+
+    fn discord_activity(&self, this_activity: &Activity) -> Option<DiscAct> {
+        match this_activity {
+            Activity::Leave => None,
+            Activity::Playing(s) => Some(DiscAct::playing(&s)),
+            Activity::Listening(s) => Some(DiscAct::listening(&s)),
+            Activity::Streaming(s) => Some(DiscAct::streaming(&s, &self.streaming_url)),
+            Activity::Random => {
+                use rand::Rng;
+                let (name, converter): (&str, fn(String) -> Activity) =
+                    match rand::thread_rng().gen_range(0, 2) {
+                        0 => ("now-playing", |s| Activity::Playing(s)),
+                        1 => ("now-listening", |s| Activity::Listening(s)),
+                        2 => ("now-streaming", |s| Activity::Streaming(s)),
+                        _ => unreachable!(),
+                    };
+
+                let active = crate::Locale::glitchy(&["now-what"]).random(name, None);
+                self.discord_activity(&converter(active))
+            }
+        }
+    }
+
+    pub fn new_activity(&self) -> Option<DiscAct> {
+        self.discord_activity(&self.activity)
+    }
+
+    fn default_streaming_url() -> String {
+        env!("CARGO_PKG_HOMEPAGE").into()
     }
 }
