@@ -1,3 +1,4 @@
+# Displayed as "Playing <message>"
 now-playing-0 = with fire
 now-playing-1 = at life — and winning
 now-playing-2 = Plotting in the Dark
@@ -46,12 +47,14 @@ now-playing-44 = Eat The Bug
 now-playing-45 = woolgathering
 now-playing-46 = no, no, I’m writing, honest
 
-now-streaming-0 = your typos, livenow-streaming-1 = confetti on your heads
-now-streaming-2 = Writers In Tears, volume XVII
-now-streaming-3 = her favourite VN
-now-streaming-4 = hbomberguy
-
-now-listening-0 = characters pleading for their quiet lives
-now-listening-1 = writers’ sobs
-now-listening-2 = sweet sweet angst
-now-listening-3 = the clickity-clack of keyboards
+# Displayed as "Streaming <message>"
+# now-streaming-0 = your typos, livenow-streaming-1 = confetti on your heads
+# now-streaming-2 = Writers In Tears, volume XVII
+# now-streaming-3 = her favourite VN
+# now-streaming-4 = hbomberguy
+#
+# Displayed as "Listening to <message>"
+# now-listening-0 = characters pleading for their quiet lives
+# now-listening-1 = writers’ sobs
+# now-listening-2 = sweet sweet angst
+# now-listening-3 = the clickity-clack of keyboards
