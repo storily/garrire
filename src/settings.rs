@@ -136,7 +136,7 @@ impl Default for Locale {
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(kebab-case)]
+#[serde(rename_all = "kebab-case")]
 pub enum Activity {
     Playing(String),
     Listening(String),
