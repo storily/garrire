@@ -22,7 +22,6 @@ lto = true
 [dependencies]
 chrono = "0.4.7"
 fluent = "0.8.0"
-fluent-bundle = "0.8.0"
 serde = "1.0.94"
 log = "0.4.6"
 env_logger = "0.7.0"
