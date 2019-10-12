@@ -1,4 +1,4 @@
-use crate::{locale_args, Locale};
+use crate::Locale;
 use serenity::client::Context;
 use serenity::framework::standard::{
     macros::{command, group},
@@ -16,10 +16,10 @@ group!({
 });
 
 #[command]
-fn eightball(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
+fn eightball(ctx: &mut Context, msg: &Message, _args: Args) -> CommandResult {
     msg.channel_id.say(
         &ctx.http,
-        Locale::new(&["8ball"]).random("eight-ball", None),
+        Locale::new(&["8ball"]).get("eight-ball", None),
     )?;
     Ok(())
 }

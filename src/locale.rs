@@ -3,6 +3,7 @@ use log::{debug, error, warn};
 use rand::Rng;
 use std::collections::HashMap;
 use std::path::PathBuf;
+use unic_langid::LanguageIdentifier;
 
 use crate::Settings;
 
@@ -11,19 +12,19 @@ use crate::Settings;
 struct LocaleAsset;
 
 lazy_static::lazy_static! {
-    static ref AVAILABLE_LOCALES: Vec<String> = {
+    static ref AVAILABLE_LOCALES: Vec<LanguageIdentifier> = {
         let mut locs = LocaleAsset::iter().filter_map(|filename| {
             let path = PathBuf::from(filename.to_string());
             path.iter().next().map(|s| s.to_owned())
         }).collect::<std::collections::HashSet<std::ffi::OsString>>()
         .into_iter()
-        .map(|s| s.to_string_lossy().to_string())
-        .collect::<Vec<String>>();
+        .map(|s| s.to_string_lossy().to_string().parse().unwrap())
+        .collect::<Vec<LanguageIdentifier>>();
 
-        // The none locale is useful for special cases when purely-random locale
+        // The empty locale is useful for special cases when purely-random locale
         // selection is needed. It is also hard-coded to fallback to no other
         // locale, while falling back to the default locale for dates/times.
-        locs.push("none".into());
+        locs.push(LanguageIdentifier::default());
 
         let default = &Settings::load().locale.default;
         if ! locs.iter().any(|loc| loc == default) {
@@ -51,12 +52,12 @@ pub struct Locale {
 
     /// Locale it will use, and derive the fallbacks from. This can be any
     /// string and will be matched against the available (embedded) files.
-    locale: String,
+    locale: LanguageIdentifier,
 
     /// Fallback chain used for date/times. Unlike language fallbacks, this
     /// remains constant for the particular root locale, such that the date/time
     /// formats of the preferred language are used even if the language isn't.
-    chain: Vec<String>,
+    chain: Vec<LanguageIdentifier>,
 
     /// Glitchiness factor. When positive, all calls to the `Locale` have a
     /// chance (0.0 to 1.0, defaults to 0.01) to use a completely different
@@ -76,26 +77,28 @@ impl Default for Locale {
     }
 }
 
-pub type Args<'args> = HashMap<&'args str, FluentValue>;
+pub type Args<'args> = HashMap<&'args str, FluentValue<'args>>;
 
-fn fallback_chain(root: &String) -> Vec<String> {
+fn fallback_chain(root: &LanguageIdentifier) -> Vec<LanguageIdentifier> {
+    use std::convert::TryInto;
+
     let settings = &Settings::load().locale;
-    let mut chain = vec![root.clone()];
+    let mut chain = vec![root.clone().try_into().unwrap()];
 
-    if root == &"none" {
+    if root == &LanguageIdentifier::default() {
         return chain;
     }
 
     if let Some(fallback) = settings.fallbacks.get(root) {
         for fall in fallback {
-            chain.push(fall.clone());
+            chain.push(fall.clone().try_into().unwrap());
         }
     }
 
     chain
 }
 
-fn actual_locale(requested: String, can_use_this: bool) -> Option<String> {
+fn actual_locale(requested: LanguageIdentifier, can_use_this: bool) -> Option<LanguageIdentifier> {
     let settings = &Settings::load().locale;
     let mut fallback_to = Some(&settings.default);
 
@@ -122,10 +125,10 @@ fn actual_locale(requested: String, can_use_this: bool) -> Option<String> {
     }
 }
 
-fn random_other_locale(this: &String) -> String {
-    let others: Vec<&String> = AVAILABLE_LOCALES
+fn random_other_locale(this: &LanguageIdentifier) -> LanguageIdentifier {
+    let others: Vec<&LanguageIdentifier> = AVAILABLE_LOCALES
         .iter()
-        .filter(|l| l != &this && l != &"none")
+        .filter(|l| l != &this && l != &&LanguageIdentifier::default())
         .collect();
     debug!("Random locale :: This: {}, Others: {:?}", this, others);
     if others.is_empty() {
@@ -138,7 +141,10 @@ fn random_other_locale(this: &String) -> String {
     .clone()
 }
 
-fn actual_locale_hard(requested_locale: String, can_use_this: bool) -> String {
+fn actual_locale_hard(
+    requested_locale: LanguageIdentifier,
+    can_use_this: bool,
+) -> LanguageIdentifier {
     match actual_locale(requested_locale.clone(), can_use_this) {
         Some(l) => l,
         None => {
@@ -160,10 +166,10 @@ impl Locale {
     }
 
     pub fn glitchy(requested_resources: &[&str]) -> Self {
-        Self::with_locale(requested_resources, "none".into()).glitchiness(1)
+        Self::with_locale(requested_resources, LanguageIdentifier::default()).glitchiness(1)
     }
 
-    pub fn with_locale(requested_resources: &[&str], requested_locale: String) -> Self {
+    pub fn with_locale(requested_resources: &[&str], requested_locale: LanguageIdentifier) -> Self {
         let chain = fallback_chain(&requested_locale);
         let locale = actual_locale_hard(requested_locale.clone(), true);
 
@@ -195,21 +201,8 @@ impl Locale {
         }
     }
 
-    fn get(
-        &self,
-        name: &str,
-        args: Option<&Args>,
-        alternate: Option<fn(&str, &str) -> bool>,
-    ) -> String {
-        debug!(
-            "Getting localisation for {} with args: {:?}{}",
-            name,
-            args,
-            match alternate {
-                Some(_) => " and a selector",
-                None => "",
-            }
-        );
+    pub fn get(&self, name: &str, args: Option<&Args>) -> String {
+        debug!("Getting localisation for {} with args: {:?}", name, args,);
 
         if self.glitch() {
             let locale = random_other_locale(&self.locale);
@@ -221,7 +214,7 @@ impl Locale {
                 chain,
                 glitchiness: 0.0,
             }
-            .get(name, args, alternate);
+            .get(name, args);
         }
 
         let mut fres = Vec::with_capacity(self.resources.len());
@@ -244,110 +237,89 @@ impl Locale {
                 );
             } else {
                 debug!("No matching asset for resource {}, falling back", asset);
-                return self.fallback().get(name, args, alternate);
+                return self.fallback().get(name, args);
             }
         }
 
         let mut bundle = FluentBundle::new(&self.chain);
+
+        bundle
+            .add_function("PREFIX_CHOOSE_VARIATE", |_, named| {
+                use rand::seq::IteratorRandom;
+                use std::str::FromStr;
+
+                let variations = named
+                    .into_iter()
+                    .map(|(prefix, n)| {
+                        let n = usize::from_str(&n.to_string())
+                            .expect("PREFIX_CHOOSE_VARIATE arguments should be numbers");
+                        std::iter::repeat(prefix.to_string())
+                            .take(n)
+                            .enumerate()
+                            .map(|(n, p)| [p, (n + 1).to_string()].join("-"))
+                    })
+                    .flatten();
+
+                variations
+                    .choose(&mut rand::thread_rng())
+                    .expect("PREFIX_CHOOSE_VARIATE needs at least one variant parameter")
+                    .into()
+            })
+            .expect("Could not add PREFIX_CHOOSE_VARIATE");
+
+        bundle
+            .add_function("CHOOSE", |positional, _| {
+                use std::str::FromStr;
+
+                rand::thread_rng()
+                    .gen_range(
+                        1,
+                        usize::from_str(
+                            &positional
+                                .iter()
+                                .next()
+                                .expect("CHOOSE requires an argument")
+                                .to_string(),
+                        )
+                        .expect("CHOOSE requires a number"),
+                    )
+                    .into()
+            })
+            .expect("Could not add CHOOSE");
+
         for res in &fres {
             bundle
                 .add_resource(res)
                 .expect("Failed to add FTL resource. This is a bug, please report it!");
         }
 
-        // TODO: handle alternates
-        let selected_name = if let Some(selector) = alternate {
-            let mut prefix = name.to_string();
-            prefix.push('-');
-            let prelen = prefix.len();
-            debug!("Selecting an alternate for {}*", prefix);
+        if let Some(msg) = bundle.get_message(name) {
+            if let Some(pattern) = msg.value {
+                let mut errors = Vec::new();
+                let message = bundle.format_pattern(&pattern, args, &mut errors);
+                if !errors.is_empty() {
+                    error!(
+                        "Error(s) while formatting message {} with args {:?}:",
+                        name, args
+                    );
 
-            let entries = bundle
-                .entries
-                .iter()
-                .filter_map(|(key, entry)| {
-                    if let fluent_bundle::entry::Entry::Message(_) = entry {
-                        if key.starts_with(&prefix) {
-                            return Some(key.split_at(prelen).1);
-                        }
+                    for err in &errors {
+                        error!("{}", err);
                     }
+                }
 
-                    None
-                })
-                .collect::<Vec<&str>>();
-
-            if entries.is_empty() {
-                debug!(
-                    "No matching entries for {}* alternates, falling back",
-                    prefix
-                );
-                return self.fallback().get(name, args, alternate);
+                message.to_string()
             } else {
-                let selected = entries
-                    .iter()
-                    .filter(|suffix| selector(name, suffix))
-                    .collect::<Vec<&&str>>();
-
-                prefix.insert_str(prelen, match selected.len() {
-                    0 => {
-                        error!("Selector for {} returned no results! This is a bug, please report it! Falling back to random.", name);
-                        entries[rand::thread_rng().gen_range(0, entries.len() - 1)]
-                    },
-                    1 => {
-                        debug!("One result for selector, good");
-                        selected[0]
-                    },
-                    _ => {
-                        debug!("> 1 results for selector, selecting at random");
-                        selected[rand::thread_rng().gen_range(0, selected.len() - 1)]
-                    }
-                });
-                prefix
+                debug!("Message for {} has no value, falling back", name);
+                self.fallback().get(name, args)
             }
-        } else {
-            name.to_string()
-        };
-
-        if let Some((message, partial_error)) = bundle.format(&selected_name, args) {
-            if !partial_error.is_empty() {
-                error!(
-                    "Partial error(s) while formatting message {} with args {:?}:",
-                    selected_name, args
-                );
-            }
-
-            for err in &partial_error {
-                error!("{}", err);
-            }
-
-            message.to_string()
         } else {
             debug!(
                 "Bundle couldn’t find the message for {}, falling back",
-                selected_name
+                name
             );
-            self.fallback().get(name, args, alternate)
+            self.fallback().get(name, args)
         }
-    }
-
-    pub fn simple(&self, name: &str, args: Option<&Args>) -> String {
-        self.get(name, args, None)
-    }
-
-    pub fn alternate(
-        &self,
-        name: &str,
-        args: Option<&Args>,
-        selector: fn(&str, &str) -> bool,
-    ) -> String {
-        self.get(name, args, Some(selector))
-    }
-
-    pub fn random(&self, name: &str, args: Option<&Args>) -> String {
-        // Because internally we choose at random if the selector filters off
-        // into more than one result, we can just return true for everything
-        // instead of choosing randomly twice.
-        self.get(name, args, Some(|_, _| true))
     }
 
     pub fn glitchiness<N>(mut self, frequency: N) -> Self

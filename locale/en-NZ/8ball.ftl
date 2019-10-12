@@ -1,20 +1,22 @@
-eight-ball-0 = It is certain.
-eight-ball-1 = It is decidedly so.
-eight-ball-2 = Without a doubt.
-eight-ball-3 = Yes – definitely.
-eight-ball-4 = You may rely on it.
-eight-ball-5 = As I see it, yes.
-eight-ball-6 = Most likely.
-eight-ball-7 = Outlook good.
-eight-ball-8 = Signs point to yes.
-eight-ball-9 = Yes.
-eight-ball-10 = Reply hazy, try again.
-eight-ball-11 = Ask again later.
-eight-ball-12 = Better not tell you now.
-eight-ball-13 = Cannot predict now.
-eight-ball-14 = Concentrate and ask again.
-eight-ball-15 = Don’t count on it.
-eight-ball-16 = My reply is no.
-eight-ball-17 = My sources say no.
-eight-ball-18 = Outlook not so good.
-eight-ball-19 = Very doubtful.
+eight-ball = { CHOOSE(20) ->
+    [1] It is decidedly so.
+    [2] Without a doubt.
+    [3] Yes – definitely.
+    [4] You may rely on it.
+    [5] As I see it, yes.
+    [6] Most likely.
+    [7] Outlook good.
+    [8] Signs point to yes.
+    [9] Yes.
+    [10] Reply hazy, try again.
+    [11] Ask again later.
+    [12] Better not tell you now.
+    [13] Cannot predict now.
+    [14] Concentrate and ask again.
+    [15] Don’t count on it.
+    [16] My reply is no.
+    [17] My sources say no.
+    [18] Outlook not so good.
+    [19] Very doubtful.
+    [20] It is certain.
+}

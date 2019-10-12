@@ -7,6 +7,7 @@ use serenity::framework::StandardFramework;
 use serenity::model::gateway::Activity as DiscAct;
 use std::collections::HashMap;
 use std::sync::Arc;
+use unic_langid::LanguageIdentifier;
 
 use crate::handler::Handler;
 
@@ -75,11 +76,10 @@ impl Discord {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 pub struct Locale {
     /// Locale to use as the default
-    #[serde(default = "Locale::default_lang")]
-    pub default: String,
+    pub default: LanguageIdentifier,
 
     /// Default glitchiness
     ///
@@ -90,7 +90,6 @@ pub struct Locale {
     /// With this setting, the frequency can be adjusted, or glitchiness can be
     /// turned off completely (value at or below zero). A value of 1.0 or more
     /// is 100% locale glitchiness.
-    #[serde(default = "Locale::default_glitch")]
     pub glitchiness: f64,
 
     /// Custom fallback chains
@@ -111,11 +110,23 @@ pub struct Locale {
     /// Here, Pirate English falls back to Middle English first, then to UK
     /// English, and finally to New Zealand English. Brazillian Portuguese only
     /// falls back to (European) Portuguese. And Te Reo Māori has no fallback.
+    pub fallbacks: HashMap<LanguageIdentifier, Vec<LanguageIdentifier>>,
+}
+
+#[derive(Debug, Deserialize)]
+#[doc(hidden)]
+pub struct LocaleParsed {
+    #[serde(default = "LocaleParsed::default_lang")]
+    pub default: String,
+
+    #[serde(default = "LocaleParsed::default_glitch")]
+    pub glitchiness: f64,
+
     #[serde(default = "HashMap::new")]
     pub fallbacks: HashMap<String, Vec<String>>,
 }
 
-impl Locale {
+impl LocaleParsed {
     fn default_lang() -> String {
         "en-NZ".into()
     }
@@ -125,13 +136,38 @@ impl Locale {
     }
 }
 
-impl Default for Locale {
+impl Default for LocaleParsed {
     fn default() -> Self {
         Self {
             default: Self::default_lang(),
             glitchiness: Self::default_glitch(),
             fallbacks: HashMap::new(),
         }
+    }
+}
+
+impl From<LocaleParsed> for Locale {
+    fn from(parsed: LocaleParsed) -> Self {
+        Self {
+            default: parsed.default.parse().unwrap(),
+            glitchiness: parsed.glitchiness,
+            fallbacks: parsed
+                .fallbacks
+                .into_iter()
+                .map(|(key, val)| {
+                    (
+                        key.parse().unwrap(),
+                        val.into_iter().map(|lang| lang.parse().unwrap()).collect(),
+                    )
+                })
+                .collect(),
+        }
+    }
+}
+
+impl Default for Locale {
+    fn default() -> Self {
+        LocaleParsed::default().into()
     }
 }
 
@@ -163,6 +199,10 @@ pub struct Settings {
     pub streaming_url: String,
 
     #[serde(default)]
+    #[serde(rename = "locale")]
+    locale_parsed: LocaleParsed,
+
+    #[serde(skip_deserializing)]
     pub locale: Locale,
 
     pub database: Database,
@@ -180,7 +220,10 @@ impl Settings {
                 .merge(config::Environment::with_prefix("GARRIRE"))
                 .unwrap();
 
-                Arc::new(settings.try_into::<Settings>().unwrap())
+                let mut settings: Settings = settings.try_into().unwrap();
+                let locale_parsed = std::mem::replace(&mut settings.locale_parsed, LocaleParsed::default());
+                settings.locale = locale_parsed.into();
+                Arc::new(settings)
             };
         }
 
@@ -216,7 +259,7 @@ impl Settings {
                         _ => unreachable!(),
                     };
 
-                let active = crate::Locale::glitchy(&["now-what"]).random(name, None);
+                let active = crate::Locale::glitchy(&["now-what"]).get(name, None);
                 self.discord_activity(&converter(active))
             }
         }
