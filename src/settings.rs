@@ -250,17 +250,21 @@ impl Settings {
             Activity::Listening(s) => Some(DiscAct::listening(&s)),
             Activity::Streaming(s) => Some(DiscAct::streaming(&s, &self.streaming_url)),
             Activity::Random => {
-                use rand::Rng;
-                let (name, converter): (&str, fn(String) -> Activity) =
-                    match rand::thread_rng().gen_range(0, 2) {
-                        0 => ("now-playing", |s| Activity::Playing(s)),
-                        1 => ("now-listening", |s| Activity::Listening(s)),
-                        2 => ("now-streaming", |s| Activity::Streaming(s)),
-                        _ => unreachable!(),
-                    };
+                let active = crate::Locale::glitchy(&["now-what"]).get("now-what", None);
 
-                let active = crate::Locale::glitchy(&["now-what"]).get(name, None);
-                self.discord_activity(&converter(active))
+                let listening = "Listening to ";
+                let playing = "Playing ";
+                let streaming = "Streaming ";
+
+                self.discord_activity(&if active.starts_with(listening) {
+                    Activity::Listening(active[listening.len() .. ].into())
+                } else if active.starts_with(playing) {
+                    Activity::Playing(active[ playing.len() .. ].into())
+                } else if active.starts_with(streaming) {
+                    Activity::Streaming(active[ streaming.len() .. ].into())
+                } else {
+                    unreachable!()
+                })
             }
         }
     }

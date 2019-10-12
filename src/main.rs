@@ -20,8 +20,6 @@ fn main() {
     eprintln!("(pre-logging) Hooking up logs...");
     settings.logging();
 
-    dbg!(Locale::glitchy(&["now-what"]).get("now-what", None));
-
     info!("Connecting to database...");
     let pool = settings.database.connect();
 
