@@ -7,7 +7,7 @@ eight-ball = { CHOOSE(20) ->
     [6] Most likely.
     [7] Outlook good.
     [8] Signs point to yes.
-    [9] Yes.
+    *[9] Yes.
     [10] Reply hazy, try again.
     [11] Ask again later.
     [12] Better not tell you now.

@@ -115,11 +115,15 @@ fn actual_locale(requested: LanguageIdentifier, can_use_this: bool) -> Option<La
         (true, true, _) => Some(requested),
         (true, false, true) | (false, _, true) => {
             let fallback = fallback_to.unwrap().clone(); // safe unwrap bc is_some()
-            warn!(
-                "Unavailable locale requested: {}, falling back to {}",
-                requested, fallback
-            );
-            actual_locale(fallback, true)
+            if requested == fallback {
+                None
+            } else {
+                warn!(
+                    "Unavailable locale requested: {}, falling back to {}",
+                    requested, fallback
+                );
+                actual_locale(fallback, true)
+            }
         }
         (true, false, false) | (false, _, false) => None,
     }
