@@ -22,7 +22,7 @@ fn choose(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         let choice = (&mut words)
             .take_while(|item| match *item {
                 "or" | "xor" => false,
-                _ => true
+                _ => true,
             })
             .collect::<Vec<&str>>()
             .join(" ");
@@ -34,12 +34,7 @@ fn choose(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         }
     }
 
-    let help = Locale::new(&["help"]).get(
-        "choose",
-        Some(&locale_args! {
-            "prefix" => Settings::load().discord.prefix.clone()
-        }),
-    );
+    let help = Locale::new(&["help"]).get("choose", Some(&locale_args! { prefix }));
 
     msg.channel_id.say(
         &ctx.http,

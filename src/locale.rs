@@ -347,7 +347,14 @@ impl Locale {
 
 #[macro_export]
 macro_rules! locale_args {
-    ($($key:expr => $value:expr),*) => {{
+    (prefix) => {locale_args! {
+        "prefix" => Settings::load().discord.prefix.clone()
+    }};
+    (prefix, $($key:expr => $value:expr),*) => {locale_args! {
+        $($key => $value),*
+        ,"prefix" => Settings::load().discord.prefix.clone()
+    }};
+    ($($key:expr => $value:expr),*$(,)?) => {{
         let mut args: crate::locale::Args = ::std::collections::HashMap::new();
         $(
             args.insert($key, ::fluent::FluentValue::from($value));
