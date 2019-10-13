@@ -29,7 +29,9 @@ where
         let member = msg.member(ctx.cache);
         info!(
             "From: {} Message: {}",
-            member.map(|m| m.display_name().into_owned()).unwrap_or("?unknown?".into()),
+            member
+                .map(|m| m.display_name().into_owned())
+                .unwrap_or("?unknown?".into()),
             msg.content
         );
     }

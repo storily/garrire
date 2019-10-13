@@ -17,9 +17,7 @@ group!({
 
 #[command]
 fn eightball(ctx: &mut Context, msg: &Message, _args: Args) -> CommandResult {
-    msg.channel_id.say(
-        &ctx.http,
-        Locale::new(&["8ball"]).get("eight-ball", None),
-    )?;
+    msg.channel_id
+        .say(&ctx.http, Locale::new(&["8ball"]).get("eight-ball", None))?;
     Ok(())
 }

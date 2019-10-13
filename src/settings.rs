@@ -132,7 +132,7 @@ impl LocaleParsed {
     }
 
     const fn default_glitch() -> f64 {
-        0.01
+        0.5
     }
 }
 
@@ -257,11 +257,11 @@ impl Settings {
                 let streaming = "Streaming ";
 
                 self.discord_activity(&if active.starts_with(listening) {
-                    Activity::Listening(active[listening.len() .. ].into())
+                    Activity::Listening(active[listening.len()..].into())
                 } else if active.starts_with(playing) {
-                    Activity::Playing(active[ playing.len() .. ].into())
+                    Activity::Playing(active[playing.len()..].into())
                 } else if active.starts_with(streaming) {
-                    Activity::Streaming(active[ streaming.len() .. ].into())
+                    Activity::Streaming(active[streaming.len()..].into())
                 } else {
                     unreachable!()
                 })

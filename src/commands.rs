@@ -1,14 +1,17 @@
 use serenity::framework::standard::CommandGroup;
 
+pub mod choose;
 pub mod eightball;
 pub mod ping;
 
+pub use choose::CHOOSE_GROUP;
 pub use eightball::EIGHTBALL_GROUP;
 pub use ping::PING_GROUP;
 
 // These two arrays MUST be in sync, with each command group
 // at the same index as its name.
 
-pub static GROUPS: &'static [&'static CommandGroup] = &[&EIGHTBALL_GROUP, &PING_GROUP];
+pub static GROUPS: &'static [&'static CommandGroup] =
+    &[&EIGHTBALL_GROUP, &CHOOSE_GROUP, &PING_GROUP];
 
-pub static NAMES: &'static [&'static str] = &["8ball", "ping"];
+pub static NAMES: &'static [&'static str] = &["8ball", "choose", "ping"];
