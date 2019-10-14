@@ -177,13 +177,13 @@ pub enum Activity {
     Playing(String),
     Listening(String),
     Streaming(String),
-    Random,
+    Locale,
     Leave,
 }
 
 impl Default for Activity {
     fn default() -> Self {
-        Activity::Random
+        Activity::Locale
     }
 }
 
@@ -249,7 +249,7 @@ impl Settings {
             Activity::Playing(s) => Some(DiscAct::playing(&s)),
             Activity::Listening(s) => Some(DiscAct::listening(&s)),
             Activity::Streaming(s) => Some(DiscAct::streaming(&s, &self.streaming_url)),
-            Activity::Random => {
+            Activity::Locale => {
                 let active = crate::Locale::glitchy(&["now-what"]).get("now-what", None);
 
                 let listening = "Listening to ";

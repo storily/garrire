@@ -4,6 +4,32 @@
 # Default: false
 # debug = true
 
+## Set the activity (the "Playing..." indication) of the bot.
+## There are a few modes:
+##
+# activity = "leave"
+## will not attempt to set the activity, “leaving” any existing one in place.
+##
+# activity = { playing = "a game" }
+# activity = { listening = "Bach" }
+# activity = { streaming = "LOST" }
+## will set the activity to the given type and string. Note that the listening
+## activity is worded as “Listening to <string>” on Discord.
+##
+# activity = "locale"
+## will pull the activity from the locale file “now-what”, key “now-what”. The
+## localised string needs to start with either of “Playing ”, “Listening to”,
+## or “Streaming ”. In addition, this will do a full glitch, so all locales are
+## considered and one is picked at random. Note that combining this with a
+## random selector in the localisation (like CHOOSE etc) will effectively weigh
+## *negatively* the locales with more variants. That is, the language selection
+## will be done before the message selection, so if English has five variants
+## and Te Reo one, the Te Reo variant will come out 50% of the time, and each
+## of the five English variants will come out 10% of the time.
+##
+# Default: "locale"
+# activity = "leave"
+
 ## Streaming URL
 ##
 ## Optionally the bot can display that it is streaming something.
