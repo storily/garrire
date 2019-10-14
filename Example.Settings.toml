@@ -1,28 +1,39 @@
 ## Turn on debug log messages. This has a stronger effect than using
 ## RUST_LOG=garrire=debug, as some features are only enabled in debug mode.
-## Default: false
+##
+# Default: false
 # debug = true
+
+## Streaming URL
+##
+## Optionally the bot can display that it is streaming something.
+# Default: the project’s URL
+# streaming_url = "https://player.vimeo.com/video/148751763?autoplay=1&title=0&byline=0&portrait=0"
 
 [database]
 
 ## The URL/DSN for the database.
 ## Required.
+##
 url = "postgres://localhost/garrire"
 
 [discord]
 
 ## The Discord bot token
 ## Required.
+##
 token = ""
 
 ## The command prefix for the bot.
-## Default: "!"
+##
+# Default: "!"
 # prefix = "~"
 
 ## Enabled commands. Some commands depend on others, and enabling one will
 ## enable dependencies. The below listing of commands may not be exhaustive;
 ## refer to src/commands.rs for a definitive list, or to the README/website.
 ## If this setting is empty, all commands are enabled.
+##
 # Default: []
 # commands = ["ping", "choose", "pick", "dice"]
 
@@ -33,14 +44,41 @@ token = ""
 ### - pick = Picks a random number between given bounds
 ### - dice = Rolls one or more dice
 
-[language]
+[locale]
 
 ## Default locale, this is what the bot will speak primarily.
-## Default: "en-NZ"
+##
+# Default: "en-NZ"
 # default = "mi-NZ"
 
-## Alternate locales, this is what users can select in their preferences as to
-## which language the bot uses when talking to or about them, and also is what
-## the bot will sometimes spontaneously speak when confused or being sassy.
-# Default: ["mi-NZ"]
-# alternates = ["en-NZ"]
+## A locale glitch is when the bot answers in a different language than
+## expected, which is pulled from the "rest of available locales" than
+## requested. This is used both for quirkiness and to advertise the
+## presence of other locales.
+##
+## With this setting, the frequency can be adjusted, or glitchiness can be
+## turned off completely (value at or below zero). A value of 1.0 or more
+## is 100% locale glitchiness (where the requested language is never given,
+## and the actual printed language is always random from the remaining pool).
+##
+## Some calls in garrīre use a “full glitch”, which is where all locales are
+## considered equally and one is picked at random; in that case glitchiness,
+## even if it is set at zero, is ignored.
+##
+# Default: 0.01
+# glitchiness = 0.05
+
+## Custom fallback chains
+##
+## By default locales fall back to the default if a resource or item is
+## missing. In this setting, more advanced fallback chains can be defined.
+## Fallback chains also affect date/time formatting.
+##
+## Here, Pirate English falls back to Middle English first, then to UK
+## English, and finally to New Zealand English. Brazillian Portuguese only
+## falls back to (European) Portuguese. And Te Reo Māori has no fallback.
+##
+# [locale.fallbacks]
+# "en-PIRATE": ["en-MIDDLE", "en-UK", "en-NZ"]
+# "pt-BR": ["pt-PT"]
+# "mi-NZ": []

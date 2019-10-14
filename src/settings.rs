@@ -132,7 +132,7 @@ impl LocaleParsed {
     }
 
     const fn default_glitch() -> f64 {
-        0.5
+        0.01
     }
 }
 
@@ -202,7 +202,7 @@ pub struct Settings {
     #[serde(rename = "locale")]
     locale_parsed: LocaleParsed,
 
-    #[serde(skip_deserializing)]
+    #[serde(skip)]
     pub locale: Locale,
 
     pub database: Database,
