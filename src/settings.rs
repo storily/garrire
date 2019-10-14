@@ -234,6 +234,8 @@ impl Settings {
                 settings
                 .merge(config::File::with_name("Settings"))
                 .unwrap()
+                .merge(config::Environment::with_prefix("GARRĪRE"))
+                .unwrap()
                 .merge(config::Environment::with_prefix("GARRIRE"))
                 .unwrap();
 
