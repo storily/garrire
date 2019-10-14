@@ -55,6 +55,11 @@ token = ""
 # Default: "!"
 # prefix = "~"
 
+## A list of user IDs who will be exempt from permission checks.
+##
+# Default: []
+# owners = [373237555430424587]
+
 ## Enabled commands. Some commands depend on others, and enabling one will
 ## enable dependencies. The below listing of commands may not be exhaustive;
 ## refer to src/commands.rs for a definitive list, or to the README/website.

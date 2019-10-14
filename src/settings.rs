@@ -5,7 +5,7 @@ use serde::Deserialize;
 use serenity::client::Client;
 use serenity::framework::StandardFramework;
 use serenity::model::gateway::Activity as DiscAct;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use unic_langid::LanguageIdentifier;
 
@@ -25,11 +25,18 @@ impl Database {
 
 #[derive(Debug, Deserialize)]
 pub struct Discord {
+    /// The token of the discord bot. Mandatory.
     pub token: String,
 
+    /// Command prefix. Defaults to `!`.
     #[serde(default = "Discord::default_prefix")]
     pub prefix: String,
 
+    /// A list of discord user IDs who are exempt from permission checks.
+    #[serde(default)]
+    pub owners: HashSet<u64>,
+
+    /// Enabled commands.
     #[serde(default)]
     pub commands: Vec<String>,
 }
@@ -52,6 +59,7 @@ impl Discord {
             .prefix(&self.prefix)
             .no_dm_prefix(true)
             .case_insensitivity(true)
+            .owners(self.owners.iter().map(|id| (*id).into()).collect())
         });
 
         if self.commands.is_empty() {
