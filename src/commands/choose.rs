@@ -14,14 +14,19 @@ group!({
 
 #[command]
 fn choose(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
-    use rand::seq::SliceRandom;
+    use rand::{seq::SliceRandom, Rng};
 
     let mut choices = Vec::new();
     let mut words = args.raw_quoted();
+    let mut xormode = false;
     loop {
         let choice = (&mut words)
             .take_while(|item| match *item {
-                "or" | "xor" => false,
+                "or" => false,
+                "xor" => {
+                    xormode = true;
+                    false
+                }
                 _ => true,
             })
             .collect::<Vec<&str>>()
@@ -38,7 +43,25 @@ fn choose(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
 
     msg.channel_id.say(
         &ctx.http,
-        choices.choose(&mut rand::thread_rng()).unwrap_or(&help),
+        if choices.is_empty() {
+            &help
+        } else {
+            let mut rng = rand::thread_rng();
+
+            if !xormode && rng.gen::<u8>() > 254 {
+                [
+                    "yes",
+                    "both",
+                    "all of the above",
+                    "not super sure, actually",
+                    "Gryffindor!",
+                ]
+                .choose(&mut rng)
+                .unwrap()
+            } else {
+                choices.choose(&mut rng).unwrap().as_str()
+            }
+        },
     )?;
     Ok(())
 }
