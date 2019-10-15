@@ -1,4 +1,4 @@
-use crate::{locale_args, Locale, Settings};
+use crate::{get_help, Locale};
 use serenity::client::Context;
 use serenity::framework::standard::{
     macros::{command, group},
@@ -14,6 +14,7 @@ group!({
 
 #[command]
 fn choose(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
+    get_help!("choose", ctx, msg, args);
     use rand::{seq::SliceRandom, Rng};
 
     let mut choices = Vec::new();
@@ -39,15 +40,13 @@ fn choose(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         }
     }
 
-    let help = Locale::new(&["help"]).get("choose", Some(&locale_args! { prefix }));
+    if choices.len() < 2 {
+        super::help(ctx, msg, "choose")
+    } else {
+        let mut rng = rand::thread_rng();
 
-    msg.channel_id.say(
-        &ctx.http,
-        if choices.is_empty() {
-            &help
-        } else {
-            let mut rng = rand::thread_rng();
-
+        msg.channel_id.say(
+            &ctx.http,
             if !xormode && rng.gen::<u8>() > 254 {
                 [
                     "yes",
@@ -59,9 +58,9 @@ fn choose(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
                 .choose(&mut rng)
                 .unwrap()
             } else {
-                choices.choose(&mut rng).unwrap().as_str()
-            }
-        },
-    )?;
-    Ok(())
+                choices.choose(&mut rng).unwrap().clone()
+            },
+        )?;
+        Ok(())
+    }
 }

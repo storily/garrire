@@ -5,6 +5,7 @@ pub(crate) use locale::Locale;
 use log::{error, info};
 pub(crate) use settings::Settings;
 
+#[macro_use]
 mod commands;
 mod handler;
 #[macro_use]
