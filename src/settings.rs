@@ -269,7 +269,9 @@ impl Settings {
             Activity::Listening(s) => Some(DiscAct::listening(&s)),
             Activity::Streaming(s) => Some(DiscAct::streaming(&s, &self.streaming_url)),
             Activity::Locale => {
-                let active = crate::Locale::glitchy(&["now-what"]).get("now-what", None);
+                let active = crate::Locale::glitchy(&["now-what"])
+                    .and_then(|l| l.get("now-what", None))
+                    .expect("Could not get now-what value out of locale");
 
                 let listening = "Listening to ";
                 let playing = "Playing ";

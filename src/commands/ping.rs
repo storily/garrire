@@ -16,12 +16,14 @@ group!({
 fn ping(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     msg.channel_id.say(
         &ctx.http,
-        Locale::new(&["main"]).get(
+        Locale::single(
+            "main",
             "pong",
             Some(&locale_args! {
                 "message" => args.message()
             }),
-        ),
+        )
+        .unwrap_or("pong".into()),
     )?;
     Ok(())
 }

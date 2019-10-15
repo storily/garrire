@@ -24,7 +24,8 @@ pub(crate) fn help(ctx: &mut Context, msg: &Message, topic: &str) -> CommandResu
     use crate::{locale_args, Locale};
     msg.channel_id.say(
         &ctx.http,
-        Locale::new(&["help"]).get(topic, Some(&locale_args! { prefix })),
+        Locale::single("help", topic, Some(&locale_args! { prefix }))
+            .unwrap_or("No help available :(".into()),
     )?;
     Ok(())
 }

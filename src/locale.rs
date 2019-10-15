@@ -98,7 +98,10 @@ fn fallback_chain(root: &LanguageIdentifier) -> Vec<LanguageIdentifier> {
     chain
 }
 
-fn actual_locale(requested: LanguageIdentifier, can_use_this: bool) -> Option<LanguageIdentifier> {
+fn actual_locale(
+    requested: LanguageIdentifier,
+    can_use_this: bool,
+) -> Result<LanguageIdentifier, String> {
     let settings = &Settings::load().locale;
     let mut fallback_to = Some(&settings.default);
 
@@ -112,11 +115,14 @@ fn actual_locale(requested: LanguageIdentifier, can_use_this: bool) -> Option<La
 
     let available = AVAILABLE_LOCALES.iter().any(|loc| loc == &requested);
     match (available, can_use_this, fallback_to.is_some()) {
-        (true, true, _) => Some(requested),
+        (true, true, _) => Ok(requested),
         (true, false, true) | (false, _, true) => {
             let fallback = fallback_to.unwrap().clone(); // safe unwrap bc is_some()
             if requested == fallback {
-                None
+                Err(format!(
+                    "Fallback ({}) is what was originally requested ({})",
+                    fallback, requested
+                ))
             } else {
                 warn!(
                     "Unavailable locale requested: {}, falling back to {}",
@@ -125,7 +131,13 @@ fn actual_locale(requested: LanguageIdentifier, can_use_this: bool) -> Option<La
                 actual_locale(fallback, true)
             }
         }
-        (true, false, false) | (false, _, false) => None,
+        (true, false, false) | (false, _, false) => {
+            error!("Unavailable locale and no fallbacks! ({})", requested);
+            Err(format!(
+                "Unavailable locale and no fallbacks! ({})",
+                requested
+            ))
+        }
     }
 }
 
@@ -145,67 +157,57 @@ fn random_other_locale(this: &LanguageIdentifier) -> LanguageIdentifier {
     .clone()
 }
 
-fn actual_locale_hard(
-    requested_locale: LanguageIdentifier,
-    can_use_this: bool,
-) -> LanguageIdentifier {
-    match actual_locale(requested_locale.clone(), can_use_this) {
-        Some(l) => l,
-        None => {
-            error!(
-                "Unavailable locale and no fallbacks! ({}), abort",
-                requested_locale
-            );
-            panic!(
-                "Unavailable locale and no fallbacks! ({}), abort",
-                requested_locale
-            );
-        }
-    }
-}
-
 impl Locale {
-    pub fn new(requested_resources: &[&str]) -> Self {
+    pub fn new(requested_resources: &[&str]) -> Result<Self, String> {
         Self::with_locale(requested_resources, Settings::load().locale.default.clone())
     }
 
-    pub fn glitchy(requested_resources: &[&str]) -> Self {
-        Self::with_locale(requested_resources, LanguageIdentifier::default()).glitchiness(1)
+    pub fn single(resource: &str, name: &str, args: Option<&Args>) -> Result<String, String> {
+        Self::with_locale(&[resource], Settings::load().locale.default.clone())
+            .and_then(|l| l.get(name, args))
     }
 
-    pub fn with_locale(requested_resources: &[&str], requested_locale: LanguageIdentifier) -> Self {
+    pub fn glitchy(requested_resources: &[&str]) -> Result<Self, String> {
+        Self::with_locale(requested_resources, LanguageIdentifier::default())
+            .map(|l| l.glitchiness(1))
+    }
+
+    pub fn with_locale(
+        requested_resources: &[&str],
+        requested_locale: LanguageIdentifier,
+    ) -> Result<Self, String> {
         let chain = fallback_chain(&requested_locale);
-        let locale = actual_locale_hard(requested_locale.clone(), true);
+        let locale = actual_locale(requested_locale.clone(), true)?;
 
         let mut resources = Vec::with_capacity(requested_resources.len());
         for resource in requested_resources {
             // Checking *all* resources across locales
             if !AVAILABLE_RESOURCES.iter().any(|res| res == resource) {
                 error!("Missing resource: {}. This is a bug, report it!", resource);
-                panic!("Missing resource: {}", resource);
+                return Err(format!("Missing resource: {}", resource));
             }
 
             resources.push(resource.to_string());
         }
 
-        Self {
+        Ok(Self {
             resources,
             locale,
             chain,
             glitchiness: Settings::load().locale.glitchiness,
-        }
+        })
     }
 
-    fn fallback(&self) -> Self {
-        Self {
+    fn fallback(&self) -> Result<Self, String> {
+        Ok(Self {
             resources: self.resources.clone(),
-            locale: actual_locale_hard(self.locale.clone(), false),
+            locale: actual_locale(self.locale.clone(), false)?,
             chain: self.chain.clone(),
             glitchiness: 0.0,
-        }
+        })
     }
 
-    pub fn get(&self, name: &str, args: Option<&Args>) -> String {
+    pub fn get(&self, name: &str, args: Option<&Args>) -> Result<String, String> {
         debug!("Getting localisation for {} with args: {:?}", name, args,);
 
         if self.glitch() {
@@ -241,7 +243,7 @@ impl Locale {
                 );
             } else {
                 debug!("No matching asset for resource {}, falling back", asset);
-                return self.fallback().get(name, args);
+                return self.fallback()?.get(name, args);
             }
         }
 
@@ -312,17 +314,17 @@ impl Locale {
                     }
                 }
 
-                message.to_string()
+                Ok(message.to_string())
             } else {
                 debug!("Message for {} has no value, falling back", name);
-                self.fallback().get(name, args)
+                self.fallback()?.get(name, args)
             }
         } else {
             debug!(
                 "Bundle couldn’t find the message for {}, falling back",
                 name
             );
-            self.fallback().get(name, args)
+            self.fallback()?.get(name, args)
         }
     }
 

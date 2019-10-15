@@ -50,7 +50,7 @@ fn choose(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         msg.channel_id.say(
             &ctx.http,
             if !xormode && rng.gen::<u8>() > 254 {
-                Locale::new(&["choose"]).get("both", None)
+                Locale::single("choose", "both", None).unwrap_or("both".into())
             } else {
                 choices.choose(&mut rng).unwrap().clone()
             },
