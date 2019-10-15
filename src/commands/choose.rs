@@ -1,10 +1,12 @@
 use crate::{get_help, Locale};
-use serenity::client::Context;
-use serenity::framework::standard::{
-    macros::{command, group},
-    Args, CommandResult,
+use serenity::{
+    client::Context,
+    framework::standard::{
+        macros::{command, group},
+        Args, CommandResult,
+    },
+    model::channel::Message,
 };
-use serenity::model::channel::Message;
 
 group!({
     name: "choose",
@@ -48,15 +50,7 @@ fn choose(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         msg.channel_id.say(
             &ctx.http,
             if !xormode && rng.gen::<u8>() > 254 {
-                [
-                    "yes",
-                    "both",
-                    "all of the above",
-                    "not super sure, actually",
-                    "Gryffindor!",
-                ]
-                .choose(&mut rng)
-                .unwrap()
+                Locale::new(&["choose"]).get("both", None)
             } else {
                 choices.choose(&mut rng).unwrap().clone()
             },
