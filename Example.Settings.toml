@@ -110,6 +110,6 @@ token = ""
 ## falls back to (European) Portuguese. And Te Reo Māori has no fallback.
 ##
 # [locale.fallbacks]
-# "en-PIRATE": ["en-MIDDLE", "en-UK", "en-NZ"]
-# "pt-BR": ["pt-PT"]
-# "mi-NZ": []
+# "en-PIRATE" = ["en-MIDDLE", "en-UK", "en-NZ"]
+# "pt-BR" = ["pt-PT"]
+# "mi-NZ" = []

@@ -1,5 +1,6 @@
 use fluent::{FluentBundle, FluentResource, FluentValue};
 use log::{debug, error, warn};
+use once_cell::sync::Lazy;
 use rand::Rng;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -11,40 +12,42 @@ use crate::Settings;
 #[folder = "locale/"]
 struct LocaleAsset;
 
-lazy_static::lazy_static! {
-    static ref AVAILABLE_LOCALES: Vec<LanguageIdentifier> = {
-        let mut locs = LocaleAsset::iter().filter_map(|filename| {
+static AVAILABLE_LOCALES: Lazy<Vec<LanguageIdentifier>> = Lazy::new(|| {
+    let mut locs = LocaleAsset::iter()
+        .filter_map(|filename| {
             let path = PathBuf::from(filename.to_string());
             path.iter().next().map(|s| s.to_owned())
-        }).collect::<std::collections::HashSet<std::ffi::OsString>>()
+        })
+        .collect::<std::collections::HashSet<std::ffi::OsString>>()
         .into_iter()
         .map(|s| s.to_string_lossy().to_string().parse().unwrap())
         .collect::<Vec<LanguageIdentifier>>();
 
-        // The empty locale is useful for special cases when purely-random locale
-        // selection is needed. It is also hard-coded to fallback to no other
-        // locale, while falling back to the default locale for dates/times.
-        locs.push(LanguageIdentifier::default());
+    // The empty locale is useful for special cases when purely-random locale
+    // selection is needed. It is also hard-coded to fallback to no other
+    // locale, while falling back to the default locale for dates/times.
+    locs.push(LanguageIdentifier::default());
 
-        let default = &Settings::load().locale.default;
-        if ! locs.iter().any(|loc| loc == default) {
-            error!("Default locale is not available, hard abort!!!");
-            panic!("Default locale is not available, hard abort!!!");
-        }
+    let default = &Settings::load().locale.default;
+    if !locs.iter().any(|loc| loc == default) {
+        error!("Default locale is not available, hard abort!!!");
+        panic!("Default locale is not available, hard abort!!!");
+    }
 
-        locs
-    };
+    locs
+});
 
-    static ref AVAILABLE_RESOURCES: Vec<String> = {
-        LocaleAsset::iter().filter_map(|filename| {
+static AVAILABLE_RESOURCES: Lazy<Vec<String>> = Lazy::new(|| {
+    LocaleAsset::iter()
+        .filter_map(|filename| {
             let path = PathBuf::from(filename.to_string());
             path.file_stem().map(|s| s.into())
-        }).collect::<std::collections::HashSet<std::ffi::OsString>>()
+        })
+        .collect::<std::collections::HashSet<std::ffi::OsString>>()
         .into_iter()
         .map(|s| s.to_string_lossy().to_string())
         .collect()
-    };
-}
+});
 
 pub struct Locale {
     /// L10n resources this instance draws from.

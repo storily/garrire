@@ -1,6 +1,7 @@
 use diesel::r2d2::{ConnectionManager, ManageConnection, Pool};
 use diesel::PgConnection;
 use log::{error, info};
+use once_cell::sync::Lazy;
 use serde::Deserialize;
 use serenity::client::Client;
 use serenity::framework::StandardFramework;
@@ -228,10 +229,9 @@ pub struct Settings {
 
 impl Settings {
     pub fn load() -> Arc<Self> {
-        lazy_static::lazy_static! {
-            pub static ref SETTINGS: Arc<Settings> = {
-                let mut settings = config::Config::default();
-                settings
+        static SETTINGS: Lazy<Arc<Settings>> = Lazy::new(|| {
+            let mut settings = config::Config::default();
+            settings
                 .merge(config::File::with_name("Settings"))
                 .unwrap()
                 .merge(config::Environment::with_prefix("GARRĪRE"))
@@ -239,12 +239,12 @@ impl Settings {
                 .merge(config::Environment::with_prefix("GARRIRE"))
                 .unwrap();
 
-                let mut settings: Settings = settings.try_into().unwrap();
-                let locale_parsed = std::mem::replace(&mut settings.locale_parsed, LocaleParsed::default());
-                settings.locale = locale_parsed.into();
-                Arc::new(settings)
-            };
-        }
+            let mut settings: Settings = settings.try_into().unwrap();
+            let locale_parsed =
+                std::mem::replace(&mut settings.locale_parsed, LocaleParsed::default());
+            settings.locale = locale_parsed.into();
+            Arc::new(settings)
+        });
 
         SETTINGS.clone()
     }
