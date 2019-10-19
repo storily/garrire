@@ -17,6 +17,9 @@ group!({
 #[command]
 fn motivate(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     get_help!("motivate", ctx, msg, args);
-    msg.channel_id.say(&ctx.http, Locale::single("main", "motivation", None, None).unwrap())?;
+    msg.channel_id.say(
+        &ctx.http,
+        Locale::single("main", "motivation", None, None).unwrap(),
+    )?;
     Ok(())
 }
