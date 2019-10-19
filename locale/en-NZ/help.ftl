@@ -11,3 +11,4 @@ choose = Usage: `{$prefix}choose <first thing> or <second thing> ...`
 eightball = Usage: `{$prefix}eightball [question]`
 ping = Usage: `{$prefix}ping [message]`
 calc = Usage: `{$prefix}= <math...>`
+colour = Usage: `{$prefix}colour [amount]`

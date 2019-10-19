@@ -8,21 +8,28 @@ use std::collections::HashSet;
 
 pub mod calc;
 pub mod choose;
+pub mod colour;
 pub mod eightball;
 pub mod ping;
 
 pub use calc::CALC_GROUP;
 pub use choose::CHOOSE_GROUP;
+pub use colour::COLOUR_GROUP;
 pub use eightball::EIGHTBALL_GROUP;
 pub use ping::PING_GROUP;
 
 // These two arrays MUST be in sync, with each command group
 // at the same index as its name.
 
-pub static GROUPS: &'static [&'static CommandGroup] =
-    &[&EIGHTBALL_GROUP, &CALC_GROUP, &CHOOSE_GROUP, &PING_GROUP];
+pub static GROUPS: &'static [&'static CommandGroup] = &[
+    &EIGHTBALL_GROUP,
+    &CALC_GROUP,
+    &CHOOSE_GROUP,
+    &COLOUR_GROUP,
+    &PING_GROUP,
+];
 
-pub static NAMES: &'static [&'static str] = &["8ball", "calc", "choose", "ping"];
+pub static NAMES: &'static [&'static str] = &["8ball", "calc", "choose", "colour", "ping"];
 
 pub(crate) fn help(ctx: &mut Context, msg: &Message, topic: &str) -> CommandResult {
     use crate::{locale_args, Locale};
