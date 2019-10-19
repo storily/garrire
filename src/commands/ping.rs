@@ -1,4 +1,4 @@
-use crate::{locale_args, Locale, get_help};
+use crate::{get_help, locale_args, Locale};
 use serenity::client::Context;
 use serenity::framework::standard::{
     macros::{command, group},

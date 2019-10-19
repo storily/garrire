@@ -1,15 +1,17 @@
+use crate::Settings;
 use serenity::{
     client::Context,
     framework::standard::{macros::help, Args, CommandGroup, CommandResult, HelpOptions},
     model::{channel::Message, id::UserId},
 };
 use std::collections::HashSet;
-use crate::Settings;
 
+pub mod calc;
 pub mod choose;
 pub mod eightball;
 pub mod ping;
 
+pub use calc::CALC_GROUP;
 pub use choose::CHOOSE_GROUP;
 pub use eightball::EIGHTBALL_GROUP;
 pub use ping::PING_GROUP;
@@ -18,9 +20,9 @@ pub use ping::PING_GROUP;
 // at the same index as its name.
 
 pub static GROUPS: &'static [&'static CommandGroup] =
-    &[&EIGHTBALL_GROUP, &CHOOSE_GROUP, &PING_GROUP];
+    &[&EIGHTBALL_GROUP, &CALC_GROUP, &CHOOSE_GROUP, &PING_GROUP];
 
-pub static NAMES: &'static [&'static str] = &["8ball", "choose", "ping"];
+pub static NAMES: &'static [&'static str] = &["8ball", "calc", "choose", "ping"];
 
 pub(crate) fn help(ctx: &mut Context, msg: &Message, topic: &str) -> CommandResult {
     use crate::{locale_args, Locale};
@@ -48,39 +50,41 @@ macro_rules! get_help {
 fn top_level_help(
     ctx: &mut Context,
     msg: &Message,
-    args: Args,
-    help_options: &'static HelpOptions,
+    _args: Args,
+    _help_options: &'static HelpOptions,
     groups: &[&'static CommandGroup],
-    owners: HashSet<UserId>,
+    _owners: HashSet<UserId>,
 ) -> CommandResult {
     use crate::{locale_args, Locale};
     use rand::Rng;
 
     let helps = Locale::new(&["help"]).unwrap();
     let prefix = &Settings::load().discord.prefix;
-    let mut gs: Vec<String> = groups.iter()
+    let mut gs: Vec<String> = groups
+        .iter()
         .map(|g| g.options.prefixes.first().map(|s| *s).unwrap_or(g.name))
         .chain(std::iter::once("help"))
         .map(|g| format!("`{}{}`", prefix, g))
         .collect();
     gs.sort();
 
-    dbg!(help_options, groups, owners);
-
     msg.channel_id.say(
         &ctx.http,
-        helps.get("help", Some(&locale_args! {
-            prefix,
-            "commandCount" => gs.len(),
-            "commandList" => helps.list(gs).unwrap()
-        })).unwrap(),
+        helps
+            .get(
+                "help",
+                Some(&locale_args! {
+                    prefix,
+                    "commandCount" => gs.len(),
+                    "commandList" => helps.list(gs).unwrap()
+                }),
+            )
+            .unwrap(),
     )?;
 
     if rand::thread_rng().gen_range(0, 10) < 2 {
-        msg.channel_id.say(
-            &ctx.http,
-            helps.get("help-syntax", None).unwrap(),
-        )?;
+        msg.channel_id
+            .say(&ctx.http, helps.get("help-syntax", None).unwrap())?;
     }
 
     Ok(())

@@ -377,7 +377,10 @@ impl Locale {
         })
     }
 
-    pub fn list<'i, S: AsRef<str>>(&self, items: impl IntoIterator<Item = S>) -> Result<String, String> {
+    pub fn list<'i, S: AsRef<str>>(
+        &self,
+        items: impl IntoIterator<Item = S>,
+    ) -> Result<String, String> {
         let joiner = self.grammar().get("list-joiner", None)?;
         let items: Vec<String> = items.into_iter().map(|i| i.as_ref().to_string()).collect();
         Ok(items.join(&joiner))
