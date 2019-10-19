@@ -10,5 +10,6 @@ help-syntax = In individual command help, `<something>` means a mandatory word/t
 choose = Usage: `{$prefix}choose <first thing> or <second thing> ...`
 eightball = Usage: `{$prefix}eightball [question]`
 ping = Usage: `{$prefix}ping [message]`
-calc = Usage: `{$prefix}= <math...>`
+calc = Usage: `{$prefix}calc <math...>`
 colour = Usage: `{$prefix}colour [amount]`
+motivate = Usage: `{$prefix}motivate`

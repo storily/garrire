@@ -10,12 +10,14 @@ pub mod calc;
 pub mod choose;
 pub mod colour;
 pub mod eightball;
+pub mod motivate;
 pub mod ping;
 
 pub use calc::CALC_GROUP;
 pub use choose::CHOOSE_GROUP;
 pub use colour::COLOUR_GROUP;
 pub use eightball::EIGHTBALL_GROUP;
+pub use motivate::MOTIVATE_GROUP;
 pub use ping::PING_GROUP;
 
 // These two arrays MUST be in sync, with each command group
@@ -26,10 +28,13 @@ pub static GROUPS: &'static [&'static CommandGroup] = &[
     &CALC_GROUP,
     &CHOOSE_GROUP,
     &COLOUR_GROUP,
+    &MOTIVATE_GROUP,
     &PING_GROUP,
+    // TODO: roll, pick
+    // LATER: name, prompt
 ];
 
-pub static NAMES: &'static [&'static str] = &["8ball", "calc", "choose", "colour", "ping"];
+pub static NAMES: &'static [&'static str] = &["8ball", "calc", "choose", "colour", "motivate", "ping"];
 
 pub(crate) fn help(ctx: &mut Context, msg: &Message, topic: &str) -> CommandResult {
     use crate::{locale_args, Locale};
