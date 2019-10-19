@@ -372,7 +372,8 @@ impl Locale {
         self.grammar.get_or_init(|| {
             Box::new(
                 Self::with_actual_locale(&["grammar"], self.locale.clone(), self.chain.clone())
-                    .expect("Failed to obtain grammar locale"),
+                    .expect("Failed to obtain grammar locale")
+                    .glitchiness(0),
             )
         })
     }
