@@ -1,1 +1,12 @@
-choose = Usage: `{$prefix}choose <first thing> or <second thing> [...]`
+help =
+    {$commandCount ->
+        [one] Command
+        *[other] Commands
+    }: {$commandList}.
+    Also use `{$prefix}<command> help` to get help for any command.
+
+help-syntax = `<something>` means a mandatory word/thing, `[another]` means it's optional, `...` means there can be more, in the same pattern.
+
+choose = Usage: `{$prefix}choose <first thing> or <second thing> ...`
+eightball = Usage: `{$prefix}eightball [question]`
+ping = Usage: `{$prefix}ping [message]`

@@ -1,4 +1,4 @@
-use crate::{locale_args, Locale};
+use crate::{locale_args, Locale, get_help};
 use serenity::client::Context;
 use serenity::framework::standard::{
     macros::{command, group},
@@ -14,6 +14,7 @@ group!({
 
 #[command]
 fn ping(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
+    get_help!("ping", ctx, msg, args);
     msg.channel_id.say(
         &ctx.http,
         Locale::single(
@@ -22,6 +23,7 @@ fn ping(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
             Some(&locale_args! {
                 "message" => args.message()
             }),
+            None,
         )
         .unwrap_or("pong".into()),
     )?;

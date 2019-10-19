@@ -1,6 +1,6 @@
 use fluent::{FluentBundle, FluentResource, FluentValue};
 use log::{debug, error, warn};
-use once_cell::sync::Lazy;
+use once_cell::sync::{Lazy, OnceCell};
 use rand::Rng;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -55,17 +55,20 @@ pub struct Locale {
 
     /// Locale it will use, and derive the fallbacks from. This can be any
     /// string and will be matched against the available (embedded) files.
-    locale: LanguageIdentifier,
+    pub locale: LanguageIdentifier,
 
     /// Fallback chain used for date/times. Unlike language fallbacks, this
     /// remains constant for the particular root locale, such that the date/time
     /// formats of the preferred language are used even if the language isn't.
-    chain: Vec<LanguageIdentifier>,
+    pub chain: Vec<LanguageIdentifier>,
 
     /// Glitchiness factor. When positive, all calls to the `Locale` have a
     /// chance (0.0 to 1.0, defaults to 0.01) to use a completely different
     /// language instead. Surprise!
-    glitchiness: f64,
+    pub glitchiness: f64,
+
+    /// Bits used for grammar formatting e.g. lists
+    grammar: OnceCell<Box<Self>>,
 }
 
 impl Default for Locale {
@@ -76,6 +79,7 @@ impl Default for Locale {
             locale: settings.default.clone(),
             chain: vec![settings.default.clone()],
             glitchiness: settings.glitchiness,
+            grammar: OnceCell::new(),
         }
     }
 }
@@ -165,9 +169,17 @@ impl Locale {
         Self::with_locale(requested_resources, Settings::load().locale.default.clone())
     }
 
-    pub fn single(resource: &str, name: &str, args: Option<&Args>) -> Result<String, String> {
-        Self::with_locale(&[resource], Settings::load().locale.default.clone())
-            .and_then(|l| l.get(name, args))
+    pub fn single(
+        resource: &str,
+        name: &str,
+        args: Option<&Args>,
+        locale: Option<LanguageIdentifier>,
+    ) -> Result<String, String> {
+        Self::with_locale(
+            &[resource],
+            locale.unwrap_or_else(|| Settings::load().locale.default.clone()),
+        )
+        .and_then(|l| l.get(name, args))
     }
 
     pub fn glitchy(requested_resources: &[&str]) -> Result<Self, String> {
@@ -175,15 +187,19 @@ impl Locale {
             .map(|l| l.glitchiness(1))
     }
 
-    pub fn with_locale(
-        requested_resources: &[&str],
-        requested_locale: LanguageIdentifier,
-    ) -> Result<Self, String> {
-        let chain = fallback_chain(&requested_locale);
-        let locale = actual_locale(requested_locale.clone(), true)?;
+    pub fn with_locale(resources: &[&str], locale: LanguageIdentifier) -> Result<Self, String> {
+        let chain = fallback_chain(&locale);
+        let locale = actual_locale(locale.clone(), true)?;
+        Self::with_actual_locale(resources, locale, chain)
+    }
 
-        let mut resources = Vec::with_capacity(requested_resources.len());
-        for resource in requested_resources {
+    fn with_actual_locale(
+        reses: &[&str],
+        locale: LanguageIdentifier,
+        chain: Vec<LanguageIdentifier>,
+    ) -> Result<Self, String> {
+        let mut resources = Vec::with_capacity(reses.len());
+        for resource in reses {
             // Checking *all* resources across locales
             if !AVAILABLE_RESOURCES.iter().any(|res| res == resource) {
                 error!("Missing resource: {}. This is a bug, report it!", resource);
@@ -198,6 +214,7 @@ impl Locale {
             locale,
             chain,
             glitchiness: Settings::load().locale.glitchiness,
+            grammar: OnceCell::new(),
         })
     }
 
@@ -207,6 +224,7 @@ impl Locale {
             locale: actual_locale(self.locale.clone(), false)?,
             chain: self.chain.clone(),
             glitchiness: 0.0,
+            grammar: OnceCell::new(),
         })
     }
 
@@ -222,6 +240,7 @@ impl Locale {
                 locale,
                 chain,
                 glitchiness: 0.0,
+                grammar: OnceCell::new(),
             }
             .get(name, args);
         }
@@ -347,6 +366,21 @@ impl Locale {
         } else {
             false
         }
+    }
+
+    fn grammar(&self) -> &Box<Self> {
+        self.grammar.get_or_init(|| {
+            Box::new(
+                Self::with_actual_locale(&["grammar"], self.locale.clone(), self.chain.clone())
+                    .expect("Failed to obtain grammar locale"),
+            )
+        })
+    }
+
+    pub fn list<'i, S: AsRef<str>>(&self, items: impl IntoIterator<Item = S>) -> Result<String, String> {
+        let joiner = self.grammar().get("list-joiner", None)?;
+        let items: Vec<String> = items.into_iter().map(|i| i.as_ref().to_string()).collect();
+        Ok(items.join(&joiner))
     }
 }
 

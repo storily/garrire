@@ -1,4 +1,4 @@
-use crate::Locale;
+use crate::{get_help, Locale};
 use serenity::client::Context;
 use serenity::framework::standard::{
     macros::{command, group},
@@ -16,10 +16,11 @@ group!({
 });
 
 #[command]
-fn eightball(ctx: &mut Context, msg: &Message, _args: Args) -> CommandResult {
+fn eightball(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
+    get_help!("eightball", ctx, msg, args);
     msg.channel_id.say(
         &ctx.http,
-        Locale::single("8ball", "eight-ball", None).unwrap(),
+        Locale::single("8ball", "eight-ball", None, None).unwrap(),
     )?;
     Ok(())
 }
