@@ -16,7 +16,7 @@ group!({
 
 #[command]
 fn choose(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
-    get_help!("choose", ctx, msg, args);
+    get_help!(on_empty, "choose", ctx, msg, args);
     use rand::{seq::SliceRandom, Rng};
 
     let mut choices = Vec::new();

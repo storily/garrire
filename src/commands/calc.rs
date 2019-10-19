@@ -17,7 +17,7 @@ group!({
 #[cfg(feature = "calc-rhai")]
 #[command]
 fn calc(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
-    get_help!("calc", ctx, msg, args);
+    get_help!(on_empty, "calc", ctx, msg, args);
 
     let expr = args.rest().trim();
 

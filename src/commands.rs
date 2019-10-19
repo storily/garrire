@@ -36,9 +36,17 @@ pub(crate) fn help(ctx: &mut Context, msg: &Message, topic: &str) -> CommandResu
 
 #[macro_export]
 macro_rules! get_help {
-    ($topic:expr, $ctx:expr, $msg:expr, $args:expr) => {
+    (on_empty, $topic:expr, $ctx:expr, $msg:expr, $args:expr) => {
         match $args.current() {
             None | Some("--help") | Some("help") | Some("-help") | Some("-h") | Some("?") => {
+                return crate::commands::help($ctx, $msg, $topic)
+            }
+            _ => {}
+        }
+    };
+    ($topic:expr, $ctx:expr, $msg:expr, $args:expr) => {
+        match $args.current() {
+            Some("--help") | Some("help") | Some("-help") | Some("-h") | Some("?") => {
                 return crate::commands::help($ctx, $msg, $topic)
             }
             _ => {}
