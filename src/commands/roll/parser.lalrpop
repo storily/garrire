@@ -1,0 +1,36 @@
+use std::str::FromStr;
+use super::Roll;
+
+grammar;
+
+pub Die: Roll = {
+    Dee <sides: Num>
+        => Roll { n: 1_f64, sides, offset: 0_f64 },
+
+    <n: Float> Dee <sides: Num>
+        => Roll { n, sides, offset: 0_f64 },
+
+    Dee <sides: Num> <offset: Offset>
+        => Roll { n: 1_f64, sides, offset },
+
+    <n: Float> Dee <sides: Num> <offset: Offset>
+        => Roll { n, sides, offset },
+};
+
+Dee: () = { "d", "D" };
+
+Offset: f64 = {
+    "+" <Float> => <>,
+    "-" <Float> => - <>,
+};
+
+Num: usize = {
+    r"[0-9]+" => usize::from_str(<>).unwrap(),
+};
+
+Float: f64 = {
+    <Num> => <> as f64,
+    <Num> "." => <> as f64,
+    "." <f: Num> => f64::from_str(&format!(".{}", f)).unwrap(),
+    <e: Num> "." <f: Num> => f64::from_str(&format!("{}.{}", e, f)).unwrap(),
+};
