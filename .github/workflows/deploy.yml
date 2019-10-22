@@ -1,28 +1,47 @@
-name: "On push: build and deploy"
+name: "On push: production-ready build"
 
 on: [push]
 
 jobs:
   check:
-    name: Build and deploy to condere
+    name: Build
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
+      - name: install library depedencies
+        run: sudo apt install -y libpq-dev
+      - name: prepare source
+        uses: actions/checkout@v1
+      - name: install rust
+        uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
           override: true
-      - uses: actions-rs/cargo@v1
+      - name: download target cache artifact if exists
+        uses: actions/download-artifact@master
+        continue-on-error: true
+        with:
+          name: target-cache
+      - name: build in release mode
+        uses: actions-rs/cargo@v1
         with:
           command: build
           args: --release
-      - uses: appleboy/scp-action@master
+      - name: assemble built files
+        run: |
+          set -euxo pipefail
+          mkdir -p release
+          cp target/release/garrīre release/
+          cp Example.Settings.toml release/
+      - name: upload built artifact
+        uses: actions/upload-artifact@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          source: target/release/garrīre
-          target: landing-pad
-          strip_components: 2
+          name: release
+          path: release
+          overwrite: true
+      - name: upload target cache
+        uses: actions/upload-artifact@master
+        with:
+          name: target-cache
+          with: target
           overwrite: true
