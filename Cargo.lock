@@ -558,6 +558,7 @@ dependencies = [
  "rust-embed 5.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
  "serenity 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "typemap 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "unic-langid 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "walkdir 2.2.9 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

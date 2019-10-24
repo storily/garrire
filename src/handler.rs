@@ -6,6 +6,13 @@ use serenity::model::gateway::Ready;
 
 use crate::Settings;
 
+pub struct Database<M> {
+    marker: std::marker::PhantomData<M>
+}
+impl<M: ManageConnection> typemap::Key for Database<M> {
+    type Value = Pool<M>;
+}
+
 pub struct Handler<M>
 where
     M: ManageConnection,

@@ -10,17 +10,25 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use unic_langid::LanguageIdentifier;
 
-use crate::handler::Handler;
+use crate::handler::{self, Handler};
 
 #[derive(Debug, Deserialize)]
 pub struct Database {
     pub url: String,
 }
 
+type DbConnection = PgConnection;
+
 impl Database {
-    pub fn connect(&self) -> Pool<ConnectionManager<PgConnection>> {
-        let manager = ConnectionManager::<PgConnection>::new(self.url.clone());
+    pub fn connect(&self) -> Pool<ConnectionManager<DbConnection>> {
+        let manager = ConnectionManager::<DbConnection>::new(self.url.clone());
         Pool::new(manager).unwrap()
+    }
+
+    pub fn from_context(ctx: &serenity::client::Context) -> Pool<ConnectionManager<DbConnection>> {
+        let data = ctx.data.read();
+        // unwrap is safe as the database is always added to the context data
+        data.get::<handler::Database<ConnectionManager<DbConnection>>>().unwrap().clone()
     }
 }
 
@@ -47,7 +55,14 @@ impl Discord {
     where
         M: ManageConnection,
     {
-        Client::new(&self.token, Handler { db }).unwrap()
+        let client = Client::new(&self.token, Handler { db: db.clone() }).unwrap();
+
+        {
+            let mut data = client.data.write();
+            data.insert::<handler::Database<M>>(db);
+        }
+
+        client
     }
 
     pub fn framework(&self) -> StandardFramework {
