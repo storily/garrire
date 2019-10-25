@@ -1,3 +1,7 @@
+### While the bot does not enforce this, the Settings file should either have
+### secure permissions (like 0600), or sensitive data like tokens and passwords
+### should be provided through another mean (like the environment).
+
 ## Turn on debug log messages. This has a stronger effect than using
 ## RUST_LOG=garrire=debug, as some features are only enabled in debug mode.
 ##
@@ -18,7 +22,7 @@
 ##
 # activity = "locale"
 ## will pull the activity from the locale file “now-what”, key “now-what”. The
-## localised string needs to start with either of “Playing ”, “Listening to”,
+## localised string needs to start with either of “Playing ”, “Listening to ”,
 ## or “Streaming ”. In addition, this will do a full glitch, so all locales are
 ## considered and one is picked at random. Note that combining this with a
 ## random selector in the localisation (like CHOOSE etc) will effectively weigh
@@ -39,6 +43,9 @@
 [database]
 
 ## The URL/DSN for the database.
+##
+## Currently, only postgres is supported.
+##
 ## Required.
 ##
 url = "postgres://localhost/garrire"
@@ -113,3 +120,23 @@ token = ""
 # "en-PIRATE" = ["en-MIDDLE", "en-UK", "en-NZ"]
 # "pt-BR" = ["pt-PT"]
 # "mi-NZ" = []
+
+## If this section is uncommented, the user and password are required.
+## Otherwise, nano commands will not do anything (and you might as well
+## disable them).
+##
+# [nanowrimo]
+
+## The nano API calls this the `identifier`.
+##
+## This doesn’t have to be your own account. Standing up a fake account just
+## for the bot probably works just as well, provided it doesn’t fall foul of
+## the T&Cs. (Untested).
+# user = "jojo"
+
+## While this is awfully insecure (if you provide a config for debugging, make
+## sure to scrub this section), it is currently the only way to obtain a token
+## and then do API calls. We can’t have a token in here either, because they
+## expire after five days. In any case, a token can be used to change a
+## password, so it would be no more secure.
+# password = "rabbit"

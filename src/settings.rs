@@ -33,6 +33,25 @@ impl Database {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct Nanowrimo {
+    /// Identifier for a nano user
+    pub user: String,
+
+    /// Password for the same
+    pub password: String,
+
+    #[serde(skip)]
+    current_token: Lazy<String>,
+}
+
+impl Nanowrimo {
+    pub fn current_token<M>(&mut self, db: &Pool<M>) -> String where
+        M: ManageConnection {
+        "".into()
+    }
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Discord {
     /// The token of the discord bot. Mandatory.
     pub token: String,
@@ -242,6 +261,7 @@ pub struct Settings {
 
     pub database: Database,
     pub discord: Discord,
+    pub nanowrimo: Option<Nanowrimo>,
 }
 
 impl Settings {
