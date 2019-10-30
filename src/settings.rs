@@ -1,4 +1,4 @@
-use diesel::r2d2::{ConnectionManager, ManageConnection, Pool};
+use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::PgConnection;
 use log::{error, info};
 use once_cell::sync::Lazy;
@@ -11,43 +11,25 @@ use std::sync::Arc;
 use unic_langid::LanguageIdentifier;
 
 use crate::handler::{self, Handler};
+use crate::nanowrimo::Nanowrimo;
 
 #[derive(Debug, Deserialize)]
 pub struct Database {
     pub url: String,
 }
 
-type DbConnection = PgConnection;
+pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 
 impl Database {
-    pub fn connect(&self) -> Pool<ConnectionManager<DbConnection>> {
-        let manager = ConnectionManager::<DbConnection>::new(self.url.clone());
-        Pool::new(manager).unwrap()
+    pub fn connect(&self) -> crate::error::Result<DbPool> {
+        let manager = ConnectionManager::<PgConnection>::new(self.url.clone());
+        Ok(Pool::new(manager)?)
     }
 
-    pub fn from_context(ctx: &serenity::client::Context) -> Pool<ConnectionManager<DbConnection>> {
+    pub fn from_context(ctx: &serenity::client::Context) -> DbPool {
         let data = ctx.data.read();
         // unwrap is safe as the database is always added to the context data
-        data.get::<handler::Database<ConnectionManager<DbConnection>>>().unwrap().clone()
-    }
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Nanowrimo {
-    /// Identifier for a nano user
-    pub user: String,
-
-    /// Password for the same
-    pub password: String,
-
-    #[serde(skip)]
-    current_token: Lazy<String>,
-}
-
-impl Nanowrimo {
-    pub fn current_token<M>(&mut self, db: &Pool<M>) -> String where
-        M: ManageConnection {
-        "".into()
+        data.get::<handler::Database>().unwrap().clone()
     }
 }
 
@@ -70,15 +52,12 @@ pub struct Discord {
 }
 
 impl Discord {
-    pub fn client<M>(&self, db: Pool<M>) -> Client
-    where
-        M: ManageConnection,
-    {
+    pub fn client(&self, db: DbPool) -> Client {
         let client = Client::new(&self.token, Handler { db: db.clone() }).unwrap();
 
         {
             let mut data = client.data.write();
-            data.insert::<handler::Database<M>>(db);
+            data.insert::<handler::Database>(db);
         }
 
         client
@@ -266,6 +245,7 @@ pub struct Settings {
 
 impl Settings {
     pub fn load() -> Arc<Self> {
+        // TODO: split into init->Result and load->Arc
         static SETTINGS: Lazy<Arc<Settings>> = Lazy::new(|| {
             let mut settings = config::Config::default();
             settings
@@ -333,5 +313,9 @@ impl Settings {
 
     fn default_streaming_url() -> String {
         env!("CARGO_PKG_HOMEPAGE").into()
+    }
+
+    pub fn nano(&self) -> Option<&Nanowrimo> {
+        self.nanowrimo.as_ref()
     }
 }

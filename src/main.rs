@@ -1,18 +1,35 @@
 #[macro_use]
 extern crate rust_embed;
+#[macro_use]
+extern crate diesel;
 
 pub(crate) use locale::Locale;
-use log::{error, info};
-pub(crate) use settings::Settings;
+use log::{debug, error, info};
+pub(crate) use settings::{DbPool, Settings};
 
 #[macro_use]
 mod commands;
+mod error;
 mod handler;
+mod nanowrimo;
 #[macro_use]
 mod locale;
+mod schema;
 mod settings;
 
 fn main() {
+    #[cfg(debug_assertions)]
+    eprintln!("(pre-logging) Wrapping main...");
+
+    if let Err(err) = start() {
+        error!("{}", err);
+        debug!("{:?}", err);
+    } else {
+        info!("Exiting gracefully");
+    }
+}
+
+fn start() -> error::Result<()> {
     #[cfg(debug_assertions)]
     eprintln!("(pre-logging) Reading configuration...");
     let settings = Settings::load();
@@ -22,7 +39,18 @@ fn main() {
     settings.logging();
 
     info!("Connecting to database...");
-    let pool = settings.database.connect();
+    let pool = settings.database.connect()?;
+
+    if settings.nanowrimo.is_some() {
+        info!("Preparing nanowrimo client...");
+        nanowrimo::Nano::init(pool.clone())?;
+        dbg!(
+            nanowrimo::Nano::load()
+                .ok_or_else(|| error::unreachable_err())?
+                .region("new-zealand-auckland")?
+                .id
+        );
+    }
 
     info!("Preparing discord client...");
     let mut client = settings.discord.client(pool.clone());
@@ -31,7 +59,7 @@ fn main() {
     client.with_framework(settings.discord.framework());
 
     info!("Starting up...");
-    if let Err(why) = client.start() {
-        error!("Err with client: {:?}", why);
-    }
+    client.start()?;
+
+    Ok(())
 }

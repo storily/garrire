@@ -1,29 +1,20 @@
-use diesel::r2d2::{ManageConnection, Pool};
 use log::info;
 use serenity::client::{Context, EventHandler};
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 
-use crate::Settings;
+use crate::{DbPool, Settings};
 
-pub struct Database<M> {
-    marker: std::marker::PhantomData<M>
-}
-impl<M: ManageConnection> typemap::Key for Database<M> {
-    type Value = Pool<M>;
+pub struct Database;
+impl typemap::Key for Database {
+    type Value = DbPool;
 }
 
-pub struct Handler<M>
-where
-    M: ManageConnection,
-{
-    pub db: Pool<M>,
+pub struct Handler {
+    pub db: DbPool,
 }
 
-impl<M> EventHandler for Handler<M>
-where
-    M: ManageConnection,
-{
+impl EventHandler for Handler {
     fn ready(&self, ctx: Context, _: Ready) {
         if let Some(act) = Settings::load().new_activity() {
             ctx.set_activity(act);
