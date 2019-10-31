@@ -17,11 +17,6 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - name: download target cache artifact if exists
-        uses: actions/download-artifact@master
-        continue-on-error: true
-        with:
-          name: target-cache
       - name: build in release mode
         uses: actions-rs/cargo@v1
         with:
@@ -48,10 +43,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: release.tar.xz
           target: landing-pad
-          overwrite: true
-      - name: upload target cache
-        uses: actions/upload-artifact@master
-        with:
-          name: target-cache
-          path: target
           overwrite: true
