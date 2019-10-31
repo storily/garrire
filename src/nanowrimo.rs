@@ -10,12 +10,14 @@ use serde::Deserialize;
 use serde_json::{json, to_vec};
 use std::borrow::Cow;
 use std::sync::{Arc, RwLock};
+use std::collections::HashMap;
 
 pub mod models;
 
 const SERVER: &str = "https://api.nanowrimo.org";
 const SIGN_IN: &str = "/users/sign_in";
 const REGION_ANNOUNCES: &str = "/groups";
+const USERS: &str = "/users";
 
 fn url(routes: &[&str]) -> String {
     SERVER.to_string() + &routes.join("/")
@@ -23,8 +25,8 @@ fn url(routes: &[&str]) -> String {
 
 pub struct Nano {
     auth: RwLock<Auth>,
-    settings: Arc<Settings>,
-    db: DbPool,
+    pub settings: Nanowrimo,
+    pub db: DbPool,
 }
 
 static INSTANCE: OnceCell<Option<Arc<Nano>>> = OnceCell::new();
@@ -38,7 +40,7 @@ impl Nano {
             .clone()
     }
 
-    fn get<T>(&self, url: String) -> Result<T>
+    fn only_get<T>(&self, url: String) -> Result<T>
     where
         for<'de> T: Deserialize<'de>,
     {
@@ -59,14 +61,27 @@ impl Nano {
         Ok(resp.json()?)
     }
 
+    fn get<T>(&self, url: String) -> Result<T>
+    where
+        for<'de> T: Deserialize<'de>,
+    {
+        match self.only_get(url.clone()) {
+            Err(Error(ErrorKind::NanoUnauthorised(_), _)) => {
+                // reauth and try again once
+                self.reauth()?;
+                self.only_get(url)
+            },
+            otherwise => otherwise
+        }
+    }
+
     pub fn init(db: DbPool) -> Result<()> {
         if INSTANCE.get().is_some() {
             return Ok(());
         }
 
-        let settings = Settings::load();
-        let value = if let Some(ref auther) = settings.nano() {
-            let auth = RwLock::new(auther.get_token(&db)?);
+        let value = if let Some(settings) = Settings::load().nano().cloned() {
+            let auth = RwLock::new(settings.get_token(&db)?);
             Some(Arc::new(Self { auth, settings, db }))
         } else {
             None
@@ -86,29 +101,38 @@ impl Nano {
     }
 
     pub fn reauth(&self) -> Result<()> {
-        self.settings
-            .nano()
-            .ok_or(unreachable_err())
-            .and_then(|auther| {
-                // TODO: figure out what order this runs in: we want to lock after get_token,
-                // even if we end up doing useless work, so as to keep the reads going.
-                *self.auth.write().expect("poisoned lock in Nano::reauth") =
-                    auther.get_token(&self.db)?;
-                Ok(())
-            })
+        // TODO: figure out what order this runs in: we want to lock after get_token,
+        // even if we end up doing useless work, so as to keep the reads going.
+        *self.auth.write().expect("poisoned lock in Nano::reauth") =
+            self.settings.get_token(&self.db)?;
+        Ok(())
     }
 
     pub fn region(&self, name: &str) -> Result<Object<Group>> {
-        let res: Response = self.get(url(&[REGION_ANNOUNCES, name]))?;
+        let res: ResponseSingle = self.get(url(&[REGION_ANNOUNCES, name]))?;
         if let Data::Group(object) = res.data {
             Ok(object)
         } else {
             Err(nano_unexpected::<Group>(res.data))
         }
     }
+
+    pub fn wordcounts(&self, username: &str) -> Result<HashMap<String, usize>> {
+        let res: ResponseSingle = self.get(url(&[USERS, username]) + "?include=projects,projectChallenges,projectSessions")?;
+
+        Ok(res.included
+            .into_iter()
+            .filter_map(|dat| match dat { Data::ProjectChallenge(c) => Some(c.attributes), _ => None })
+            .filter_map(|challenge| if let Some(count) = challenge.current_count.or(challenge.latest_count) {
+                Some((challenge.name, count))
+            } else {
+                None
+            })
+            .collect())
+    }
 }
 
-#[derive(Debug, Deserialize, Queryable, Insertable)]
+#[derive(Clone, Debug, Deserialize, Queryable, Insertable)]
 #[table_name = "auth_table"]
 pub struct Auth {
     #[serde(skip)]
@@ -133,13 +157,16 @@ impl Auth {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Nanowrimo {
     /// Identifier for a nano user
     pub user: String,
 
     /// Password for the same
     pub password: String,
+
+    /// Current nano event
+    pub current_event: Option<String>,
 }
 
 impl Nanowrimo {

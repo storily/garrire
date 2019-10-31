@@ -14,33 +14,26 @@ pub mod motivate;
 pub mod pick;
 pub mod ping;
 pub mod roll;
-
-pub use calc::CALC_GROUP;
-pub use choose::CHOOSE_GROUP;
-pub use colour::COLOUR_GROUP;
-pub use eightball::EIGHTBALL_GROUP;
-pub use motivate::MOTIVATE_GROUP;
-pub use pick::PICK_GROUP;
-pub use ping::PING_GROUP;
-pub use roll::ROLL_GROUP;
+pub mod wordcount;
 
 // These two arrays MUST be in sync, with each command group
 // at the same index as its name.
 
 pub static GROUPS: &'static [&'static CommandGroup] = &[
-    &EIGHTBALL_GROUP,
-    &CALC_GROUP,
-    &CHOOSE_GROUP,
-    &COLOUR_GROUP,
-    &MOTIVATE_GROUP,
-    &PICK_GROUP,
-    &PING_GROUP,
-    &ROLL_GROUP,
+    &eightball::EIGHTBALL_GROUP,
+    &calc::CALC_GROUP,
+    &choose::CHOOSE_GROUP,
+    &colour::COLOUR_GROUP,
+    &motivate::MOTIVATE_GROUP,
+    &pick::PICK_GROUP,
+    &ping::PING_GROUP,
+    &roll::ROLL_GROUP,
+    &wordcount::WC_GROUP,
     // LATER: name, prompt
 ];
 
 pub const NAMES: &'static [&'static str] = &[
-    "8ball", "calc", "choose", "colour", "motivate", "pick", "ping", "roll",
+    "8ball", "calc", "choose", "colour", "motivate", "pick", "ping", "roll", "wordcount"
 ];
 
 pub(crate) fn help(ctx: &mut Context, msg: &Message, topic: &str) -> CommandResult {

@@ -44,12 +44,6 @@ fn start() -> error::Result<()> {
     if settings.nanowrimo.is_some() {
         info!("Preparing nanowrimo client...");
         nanowrimo::Nano::init(pool.clone())?;
-        dbg!(
-            nanowrimo::Nano::load()
-                .ok_or_else(|| error::unreachable_err())?
-                .region("new-zealand-auckland")?
-                .id
-        );
     }
 
     info!("Preparing discord client...");
