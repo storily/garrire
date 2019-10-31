@@ -33,7 +33,15 @@ pub static GROUPS: &'static [&'static CommandGroup] = &[
 ];
 
 pub const NAMES: &'static [&'static str] = &[
-    "8ball", "calc", "choose", "colour", "motivate", "pick", "ping", "roll", "wordcount"
+    "8ball",
+    "calc",
+    "choose",
+    "colour",
+    "motivate",
+    "pick",
+    "ping",
+    "roll",
+    "wordcount",
 ];
 
 pub(crate) fn help(ctx: &mut Context, msg: &Message, topic: &str) -> CommandResult {

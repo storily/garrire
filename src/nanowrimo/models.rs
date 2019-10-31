@@ -38,7 +38,7 @@ pub enum Data {
     #[serde(rename = "project-challenges")]
     ProjectChallenge(Object<ProjectChallenge>),
     #[serde(other)]
-    Unknown
+    Unknown,
 }
 
 #[derive(Debug, Deserialize)]

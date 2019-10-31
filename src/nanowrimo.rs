@@ -8,9 +8,8 @@ use models::*;
 use once_cell::sync::OnceCell;
 use serde::Deserialize;
 use serde_json::{json, to_vec};
-use std::borrow::Cow;
-use std::sync::{Arc, RwLock};
 use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 
 pub mod models;
 
@@ -32,7 +31,6 @@ pub struct Nano {
 static INSTANCE: OnceCell<Option<Arc<Nano>>> = OnceCell::new();
 impl Nano {
     fn token(&self) -> String {
-        use std::borrow::Borrow;
         self.auth
             .read()
             .expect("poisoned lock in Nano::get")
@@ -70,8 +68,8 @@ impl Nano {
                 // reauth and try again once
                 self.reauth()?;
                 self.only_get(url)
-            },
-            otherwise => otherwise
+            }
+            otherwise => otherwise,
         }
     }
 
@@ -108,6 +106,7 @@ impl Nano {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn region(&self, name: &str) -> Result<Object<Group>> {
         let res: ResponseSingle = self.get(url(&[REGION_ANNOUNCES, name]))?;
         if let Data::Group(object) = res.data {
@@ -118,15 +117,22 @@ impl Nano {
     }
 
     pub fn wordcounts(&self, username: &str) -> Result<HashMap<String, usize>> {
-        let res: ResponseSingle = self.get(url(&[USERS, username]) + "?include=projects,projectChallenges,projectSessions")?;
+        let res: ResponseSingle = self
+            .get(url(&[USERS, username]) + "?include=projects,projectChallenges,projectSessions")?;
 
-        Ok(res.included
+        Ok(res
+            .included
             .into_iter()
-            .filter_map(|dat| match dat { Data::ProjectChallenge(c) => Some(c.attributes), _ => None })
-            .filter_map(|challenge| if let Some(count) = challenge.current_count.or(challenge.latest_count) {
-                Some((challenge.name, count))
-            } else {
-                None
+            .filter_map(|dat| match dat {
+                Data::ProjectChallenge(c) => Some(c.attributes),
+                _ => None,
+            })
+            .filter_map(|challenge| {
+                if let Some(count) = challenge.current_count.or(challenge.latest_count) {
+                    Some((challenge.name, count))
+                } else {
+                    None
+                }
             })
             .collect())
     }

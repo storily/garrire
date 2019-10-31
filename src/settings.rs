@@ -26,11 +26,11 @@ impl Database {
         Ok(Pool::new(manager)?)
     }
 
-    pub fn from_context(ctx: &serenity::client::Context) -> DbPool {
-        let data = ctx.data.read();
-        // unwrap is safe as the database is always added to the context data
-        data.get::<handler::Database>().unwrap().clone()
-    }
+    // pub fn from_context(ctx: &serenity::client::Context) -> DbPool {
+    //     let data = ctx.data.read();
+    //     // unwrap is safe as the database is always added to the context data
+    //     data.get::<handler::Database>().unwrap().clone()
+    // }
 }
 
 #[derive(Debug, Deserialize)]
