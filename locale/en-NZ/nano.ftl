@@ -4,4 +4,6 @@ count = {$username}: { $count ->
     *[more] **{$count}** words
 }
 
+count-list = {$username}: `{$counts}`
+
 error = {$username}: hmm, I didn’t manage to fetch that :(

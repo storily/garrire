@@ -22,27 +22,56 @@ fn wc(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
     if let Ok(username) = args.single::<String>() {
         let nanos = Locale::new(&["nano"]).unwrap();
 
-        let reply = match get_wordcount(&username) {
-            Ok(count) => nanos.get(
-                "count",
-                Some(&locale_args! {
-                    prefix,
-                    "username" => username,
-                    "count" => count
-                }),
-            ),
-            Err(err) => {
-                log::warn!("wordcount fetch error: {}\n{:?}", err, err);
-                nanos.get(
+        let list = if let Ok(second) = args.single::<String>() {
+            second == "list"
+        } else {
+            false
+        };
+
+        let reply = if list {
+            match get_wordcount_list(&username) {
+                Ok(counts) => nanos
+                    .get(
+                        "count-list",
+                        Some(&locale_args! {
+                            prefix,
+                            "username" => username,
+                            "counts" => counts
+                        }),
+                    )
+                    .unwrap(),
+                Err(err) => do_error(err, username),
+            }
+        } else {
+            match get_wordcount(&username) {
+                Ok(count) => nanos
+                    .get(
+                        "count",
+                        Some(&locale_args! {
+                            prefix,
+                            "username" => username,
+                            "count" => count
+                        }),
+                    )
+                    .unwrap(),
+                Err(err) => do_error(err, username),
+            }
+        };
+
+        fn do_error(err: impl std::error::Error, username: String) -> String {
+            log::warn!("wordcount fetch error: {}\n{:?}", err, err);
+            let nanos = Locale::new(&["nano"]).unwrap();
+
+            nanos
+                .get(
                     "error",
                     Some(&locale_args! {
                         prefix,
                         "username" => username
                     }),
                 )
-            }
+                .unwrap()
         }
-        .unwrap();
 
         msg.channel_id.say(&ctx.http, reply)?;
         return Ok(());
@@ -67,4 +96,9 @@ fn get_wordcount(username: &str) -> Result<usize> {
         .unwrap_or(&0);
 
     Ok(*count)
+}
+
+fn get_wordcount_list(username: &str) -> Result<String> {
+    let nano = nanowrimo::Nano::load().ok_or_else(|| unreachable_err())?;
+    Ok(format!("{:?}", nano.wordcounts(username)?))
 }
