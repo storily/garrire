@@ -6,4 +6,4 @@ count = {$username}: { $count ->
 
 count-list = {$username}: `{$counts}`
 
-error = {$username}: hmm, I didn’t manage to fetch that :(
+error = {$username}: sorry! `{$detail}`

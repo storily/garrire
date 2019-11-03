@@ -67,7 +67,8 @@ fn wc(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
                     "error",
                     Some(&locale_args! {
                         prefix,
-                        "username" => username
+                        "username" => username,
+                        "detail" => err.to_string()
                     }),
                 )
                 .unwrap()
