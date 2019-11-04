@@ -1,5 +1,5 @@
 plot = { CHOOSE(141) ->
-    [1] One of your characters suddenly jumps. Why? (Félix)
+    *[1] One of your characters suddenly jumps. Why? (Félix)
     [2] After a long trip, you wander into a valley where high towers seem to literally anchor clouds in place. It's dark down there, but why? (Félix)
     [3] Your tribe encounters werewolves that don't actually depend on the moon at all, but on another celestial body. (Félix)
     [4] Your location is not actually where everyone think it is. Entryways (doors, city gates, windows, whatever) are portals. Suddenly those stop working: where are you and is all of your party here? (Félix)
