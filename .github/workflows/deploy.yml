@@ -20,10 +20,10 @@ jobs:
       - name: cache target
         uses: actions/cache@preview
         with:
-          path: target/release
-          key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
+          path: target/release/build
+          key: ${{ runner.os }}-target.release.build-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-target-release-
+            ${{ runner.os }}-target.release.build-
       - name: build in release mode
         uses: actions-rs/cargo@v1
         with:
