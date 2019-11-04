@@ -24,9 +24,31 @@ impl EventHandler for Handler {
     }
 
     fn message(&self, ctx: Context, msg: Message) {
-        let member = msg.member(ctx.cache);
+        use serenity::model::channel::Channel;
+
+        let member = msg.member(&ctx.cache);
+        let channel = msg.channel(&ctx.cache);
+
         info!(
-            "From: {} Message: {}",
+            "[{}] [{}] {}",
+            channel
+                .map(|c| match c {
+                    Channel::Guild(gc) => {
+                        let chan = "#".to_string() + &gc.read().name;
+                        gc.read()
+                            .category_id
+                            .map(|cat| {
+                                let cat = cat.to_channel(ctx.http);
+                                cat.map(|cat| cat.category().unwrap().read().name.clone())
+                                    .unwrap_or("?category?".into())
+                                    + "/"
+                                    + &chan
+                            })
+                            .unwrap_or(chan)
+                    }
+                    c => c.to_string(),
+                })
+                .unwrap_or("#unknown#".into()),
             member
                 .map(|m| m.display_name().into_owned())
                 .unwrap_or("?unknown?".into()),
