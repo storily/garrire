@@ -17,6 +17,13 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - name: cache target
+        uses: actions/cache@preview
+        with:
+          path: target/release
+          key: ${{ runner.os }}-target-release-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-target-release-
       - name: build in release mode
         uses: actions-rs/cargo@v1
         with:
