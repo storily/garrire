@@ -13,6 +13,7 @@ pub mod eightball;
 pub mod motivate;
 pub mod pick;
 pub mod ping;
+pub mod plot;
 pub mod roll;
 pub mod wordcount;
 
@@ -27,6 +28,7 @@ pub static GROUPS: &'static [&'static CommandGroup] = &[
     &motivate::MOTIVATE_GROUP,
     &pick::PICK_GROUP,
     &ping::PING_GROUP,
+    &plot::PLOT_GROUP,
     &roll::ROLL_GROUP,
     &wordcount::WC_GROUP,
     // LATER: name, prompt
@@ -40,6 +42,7 @@ pub const NAMES: &'static [&'static str] = &[
     "motivate",
     "pick",
     "ping",
+    "plot",
     "roll",
     "wordcount",
 ];
