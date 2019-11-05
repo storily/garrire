@@ -59,6 +59,14 @@ fn wc(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
             .get("no-nano-user", Some(&locale_args! { prefix }))
             .unwrap(),
         Some(username) => {
+            if let Some(chan) = msg.channel(&ctx.cache) {
+                if let Some(guild) = chan.guild() {
+                    if let Some(lock) = guild.try_read() {
+                        lock.broadcast_typing(&ctx.http).ok();
+                    }
+                }
+            }
+
             if list {
                 match get_wordcount_list(&username) {
                     Ok(counts) => nanos
