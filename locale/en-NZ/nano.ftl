@@ -7,3 +7,7 @@ count = {$username}: { $count ->
 count-list = {$username}: `{$counts}`
 
 error = {$username}: sorry! `{$detail}`
+
+no-nano-user =
+    Looks like I don’t have your nano user on file!
+    Set it up with: `{$prefix}my nano <username>`

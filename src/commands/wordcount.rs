@@ -1,4 +1,4 @@
-use crate::{error::*, get_help, nanowrimo};
+use crate::{error::*, get_help, nanowrimo, settings::Database};
 use serenity::{
     client::Context,
     framework::standard::{
@@ -14,71 +14,101 @@ group!({
     commands: [wc],
 });
 
+#[derive(Clone, Debug, Queryable)]
+pub struct User {
+    pub id: i32,
+    pub discord_id: i64,
+    pub nick: Option<String>,
+    pub nano_user: Option<String>,
+    pub tz: String,
+}
+
 #[command]
-fn wc(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
+fn wc(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     use crate::{locale_args, Locale};
-    get_help!(on_empty, "wordcount", ctx, msg, args);
+    get_help!("wordcount", ctx, msg, args);
 
-    if let Ok(username) = args.single::<String>() {
-        let nanos = Locale::new(&["nano"]).unwrap();
+    let db = Database::from_context(ctx);
+    let dbuser: Option<User> = {
+        use crate::schema::users::dsl::*;
+        use diesel::prelude::*;
+        use std::convert::TryInto;
 
-        let list = if let Ok(second) = args.single::<String>() {
-            second == "list"
-        } else {
-            false
-        };
+        let author_id: i64 = msg.author.id.0.try_into().unwrap();
+        users
+            .select((id, discord_id, nick, nano_user, tz))
+            .filter(discord_id.eq(author_id))
+            .first(&db.get().unwrap())
+            .optional()
+            .unwrap()
+    };
 
-        let reply = if list {
-            match get_wordcount_list(&username) {
-                Ok(counts) => nanos
-                    .get(
-                        "count-list",
-                        Some(&locale_args! {
-                            prefix,
-                            "username" => username,
-                            "counts" => counts
-                        }),
-                    )
-                    .unwrap(),
-                Err(err) => do_error(err, username),
-            }
-        } else {
-            match get_wordcount(&username) {
-                Ok(count) => nanos
-                    .get(
-                        "count",
-                        Some(&locale_args! {
-                            prefix,
-                            "username" => username,
-                            "count" => count
-                        }),
-                    )
-                    .unwrap(),
-                Err(err) => do_error(err, username),
-            }
-        };
-
-        fn do_error(err: impl std::error::Error, username: String) -> String {
-            log::warn!("wordcount fetch error: {}\n{:?}", err, err);
-            let nanos = Locale::new(&["nano"]).unwrap();
-
-            nanos
-                .get(
-                    "error",
-                    Some(&locale_args! {
-                        prefix,
-                        "username" => username,
-                        "detail" => err.to_string()
-                    }),
-                )
-                .unwrap()
+    let mut list = false;
+    match args.rest() {
+        "" => {}
+        "list" => {
+            list = true;
         }
-
-        msg.channel_id.say(&ctx.http, reply)?;
-        return Ok(());
+        _ => return super::help(ctx, msg, "wordcount"),
     }
 
-    super::help(ctx, msg, "wordcount")
+    let nanos = Locale::new(&["nano"]).unwrap();
+
+    let reply = match dbuser.and_then(|u| u.nano_user) {
+        None => nanos
+            .get("no-nano-user", Some(&locale_args! { prefix }))
+            .unwrap(),
+        Some(username) => {
+            if list {
+                match get_wordcount_list(&username) {
+                    Ok(counts) => nanos
+                        .get(
+                            "count-list",
+                            Some(&locale_args! {
+                                prefix,
+                                "username" => username,
+                                "counts" => counts
+                            }),
+                        )
+                        .unwrap(),
+                    Err(err) => do_error(err, username),
+                }
+            } else {
+                match get_wordcount(&username) {
+                    Ok(count) => nanos
+                        .get(
+                            "count",
+                            Some(&locale_args! {
+                                prefix,
+                                "username" => username,
+                                "count" => count
+                            }),
+                        )
+                        .unwrap(),
+                    Err(err) => do_error(err, username),
+                }
+            }
+        }
+    };
+
+    fn do_error(err: impl std::error::Error, username: String) -> String {
+        log::warn!("wordcount fetch error: {}\n{:?}", err, err);
+        let nanos = Locale::new(&["nano"]).unwrap();
+
+        nanos
+            .get(
+                "error",
+                Some(&locale_args! {
+                    prefix,
+                    "username" => username,
+                    "detail" => err.to_string()
+                }),
+            )
+            .unwrap()
+    }
+
+    msg.channel_id.say(&ctx.http, reply)?;
+    return Ok(());
 }
 
 fn get_wordcount(username: &str) -> Result<usize> {
