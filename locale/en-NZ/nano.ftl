@@ -2,6 +2,9 @@ count = {$username}: { $count ->
     [0] zero words
     [1] a single lonely word
     *[more] **{$count}** words
+}{ $palindromic ->
+    *[0] {""}
+    [1] {" nice!"}
 }
 
 count-list = {$username}: `{$counts}`

@@ -12,6 +12,7 @@ calc = Usage: `{$prefix}calc <math...>`
 choose = Usage: `{$prefix}choose <first thing> or <second thing> ...`
 colour = Usage: `{$prefix}colour [amount]`
 motivate = Usage: `{$prefix}motivate`
+palindrome = Usage: `{$prefix}palindrome <n>` — Get the next palindromic number
 pick = Usage: `{$prefix}pick <start> <end>` — Picks a number between start and end
 ping = Usage: `{$prefix}ping [message]`
 plot = Usage: `{$prefix}plot` — Get a random plot

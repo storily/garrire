@@ -2,6 +2,9 @@ count = {$username}: { $count ->
     [0] kahore kupu
     [1] kupu matua
     *[more] **{$count}** kupu
+}{ $palindromic ->
+    *[0] {""}
+    [1] {" ka pai!"}
 }
 
 count-list = {$username}: `{$counts}`

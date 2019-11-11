@@ -89,7 +89,8 @@ fn wc(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
                             Some(&locale_args! {
                                 prefix,
                                 "username" => username,
-                                "count" => count
+                                "count" => count,
+                                "palindromic" => crate::palindromic::is_palindromic(count) as u8
                             }),
                         )
                         .unwrap(),

@@ -11,6 +11,7 @@ pub mod choose;
 pub mod colour;
 pub mod eightball;
 pub mod motivate;
+pub mod palindrome;
 pub mod pick;
 pub mod ping;
 pub mod plot;
@@ -26,6 +27,7 @@ pub static GROUPS: &'static [&'static CommandGroup] = &[
     &choose::CHOOSE_GROUP,
     &colour::COLOUR_GROUP,
     &motivate::MOTIVATE_GROUP,
+    &palindrome::PALINDROME_GROUP,
     &pick::PICK_GROUP,
     &ping::PING_GROUP,
     &plot::PLOT_GROUP,
@@ -40,6 +42,7 @@ pub const NAMES: &'static [&'static str] = &[
     "choose",
     "colour",
     "motivate",
+    "palindrome",
     "pick",
     "ping",
     "plot",

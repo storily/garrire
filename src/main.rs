@@ -11,9 +11,10 @@ pub(crate) use settings::{DbPool, Settings};
 mod commands;
 mod error;
 mod handler;
-mod nanowrimo;
 #[macro_use]
 mod locale;
+mod nanowrimo;
+mod palindromic;
 mod schema;
 mod settings;
 
