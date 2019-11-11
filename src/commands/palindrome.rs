@@ -17,7 +17,8 @@ fn palindrome(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult
     get_help!(on_empty, "palindrome", ctx, msg, args);
 
     if let Ok(n) = args.single::<usize>() {
-        msg.channel_id.say(&ctx.http, next_palindromic(n))?;
+        let np = next_palindromic(n);
+        msg.channel_id.say(&ctx.http, format!("{} ({} + {})", np, n, np - n))?;
         Ok(())
     } else {
         super::help(ctx, msg, "palindrome")
