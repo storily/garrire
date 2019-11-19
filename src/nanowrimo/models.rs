@@ -64,7 +64,7 @@ pub struct Group {
 pub struct User {
     pub name: String,
     pub slug: String, // "username"
-    pub email: String,
+    pub email: Option<String>,
     pub time_zone: String,
     pub created_at: String,
 }
