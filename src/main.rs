@@ -19,6 +19,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let shard = Shard::new(config).await?;
     let mut events = shard.events().await;
 
+    println!("listening for events...");
     while let Some(event) = events.next().await {
         tokio::spawn(handler(http.clone(), event));
     }
@@ -28,7 +29,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 async fn handler(http: Arc<HttpClient>, event: Event) {
     if let Err(err) = handle_event(http, event).await {
-        eprintln!("{:?}", err);
+        eprintln!("handler: {:?}", err);
     }
 }
 
@@ -38,8 +39,10 @@ async fn handle_event(http: Arc<HttpClient>, event: Event) -> Result<(), Box<dyn
             println!("Connected on shard {}", connected.shard_id);
         },
         Event::MessageCreate(msg) => {
+            println!("message: {}", msg.content);
             if msg.content == "!!!ping" {
                 http.create_message(msg.channel_id).content("Pong!").await?;
+                http.create_message(msg.channel_id).content("!!!ping").await?;
             }
         },
         _ => {},
