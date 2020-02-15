@@ -2,17 +2,85 @@ prefix = _{ "\u{F8F8}" }
 
 command = {
   prefix ~ (
-    test |
-    tes2
+    help |
+    eightball |
+    calc |
+    choose |
+    colour |
+    palindrome |
+    pick |
+    ping |
+    roll |
+    wordcount
   )
 }
 
-test = {
-  "test" ~
-  arguments*
+help = {
+  "help" ~ WHITESPACE+ ~
+  a_word?
 }
 
-tes2 = { "tes2" }
-arguments = { ANY+ }
+eightball = {
+  ("8ball" | "eightball") ~ WHITESPACE+ ~
+  some_words*
+}
 
-WHITESPACE = _{ " " }
+calc = {
+  ("calc" | "=") ~ WHITESPACE+ ~
+  math
+}
+
+math = {
+  "todo"
+}
+
+choose = {
+  ("choose" | "?") ~ WHITESPACE+ ~
+  a_word ~
+  (WHITESPACE+ ~ (or | xor) ~ WHITESPACE+ ~ a_word)+
+}
+
+or = { "or" | "OR" }
+xor = { "xor" | "XOR" }
+
+colour = {
+  ("colour" | "color") ~ WHITESPACE+ ~
+  number?
+}
+
+palindrome = {
+  ("palindrome" | "pal") ~ WHITESPACE+ ~
+  number
+}
+
+pick = {
+  "pick" ~ WHITESPACE+ ~
+  number ~ number
+}
+
+ping = {
+  "ping" ~ WHITESPACE+ ~
+  some_words*
+}
+
+roll = {
+  ("dice" | "die" | "roll") ~
+  (WHITESPACE+ ~ die)+
+}
+
+die = {
+  number? ~ "d" ~ number ~ (("+" | "-") ~ number)?
+}
+
+wordcount = {
+  ("wordcount" | "wc") ~ WHITESPACE+ ~
+  a_word?
+}
+
+some_words = { a_word ~ (WHITESPACE+ ~ a_word)* }
+a_word = { ('a'..'z')+ }
+digit = { '0'..'9' }
+non_zero = { '1'..'9' }
+number = @{ non_zero ~ digit* }
+
+WHITESPACE = _{ " " | "\t" | "\n" }
