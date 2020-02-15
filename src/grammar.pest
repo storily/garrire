@@ -1,0 +1,18 @@
+prefix = _{ "\u{F8F8}" }
+
+command = {
+  prefix ~ (
+    test |
+    tes2
+  )
+}
+
+test = {
+  "test" ~
+  arguments*
+}
+
+tes2 = { "tes2" }
+arguments = { ANY+ }
+
+WHITESPACE = _{ " " }
