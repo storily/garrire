@@ -117,8 +117,8 @@ impl Nano {
     }
 
     pub fn wordcounts(&self, username: &str) -> Result<HashMap<String, usize>> {
-        let res: ResponseSingle = self
-            .get(url(&[USERS, username]) + "?include=projectChallenges")?;
+        let res: ResponseSingle =
+            self.get(url(&[USERS, username]) + "?include=projectChallenges")?;
 
         Ok(res
             .included
