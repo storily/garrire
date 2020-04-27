@@ -37,9 +37,9 @@ fn calc(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         msg.channel_id.say(
             &ctx.http,
             match engine.eval::<f64>(expr) {
-                Ok(value) => format!("{} = {}", expr, value),
+                Ok(value) => format!("{} = **{}**", expr, value),
                 Err(_) => match engine.eval::<i64>(expr) {
-                    Ok(value) => format!("{} = {}", expr, value),
+                    Ok(value) => format!("{} = **{}**", expr, value),
                     Err(err) => format!("{} = {}", expr, err),
                 },
             },
@@ -50,6 +50,7 @@ fn calc(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
 
 #[cfg(not(feature = "calc-rhai"))]
 #[command]
+#[aliases("=")]
 fn calc(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     get_help!("calc", ctx, msg, args);
     msg.channel_id.say(&ctx.http, "Calculator not available!")?;
