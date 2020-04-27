@@ -8,11 +8,9 @@ use serenity::{
     model::channel::Message,
 };
 
-group!({
-    name: "motivate",
-    options: {},
-    commands: [motivate],
-});
+#[group]
+#[commands(motivate)]
+pub struct MOTIVATE;
 
 #[command]
 fn motivate(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {

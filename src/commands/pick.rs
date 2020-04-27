@@ -9,11 +9,9 @@ use serenity::{
     model::channel::Message,
 };
 
-group!({
-    name: "pick",
-    options: {},
-    commands: [pick],
-});
+#[group]
+#[commands(pick)]
+pub struct PICK;
 
 #[command]
 fn pick(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {

@@ -6,10 +6,9 @@ use serenity::framework::standard::{
 };
 use serenity::model::channel::Message;
 
-group!({
-    name: "palindrome",
-    commands: [palindrome],
-});
+#[group]
+#[commands(palindrome)]
+pub struct PALINDROME;
 
 #[command]
 fn palindrome(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {

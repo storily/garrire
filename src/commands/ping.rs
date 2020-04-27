@@ -6,11 +6,9 @@ use serenity::framework::standard::{
 };
 use serenity::model::channel::Message;
 
-group!({
-    name: "ping",
-    options: {},
-    commands: [ping],
-});
+#[group]
+#[commands(ping)]
+pub struct PING;
 
 #[command]
 fn ping(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {

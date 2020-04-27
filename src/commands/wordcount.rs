@@ -8,11 +8,9 @@ use serenity::{
     model::channel::Message,
 };
 
-group!({
-    name: "wc",
-    options: {},
-    commands: [wc],
-});
+#[group]
+#[commands(wc)]
+pub struct WC;
 
 #[derive(Clone, Debug, Queryable)]
 pub struct User {

@@ -9,6 +9,7 @@ use serenity::{
     model::channel::Message,
 };
 
+#[allow(unused_parens)]
 mod parser;
 
 #[derive(Debug)]
@@ -61,11 +62,9 @@ impl std::fmt::Display for Roll {
     }
 }
 
-group!({
-    name: "roll",
-    options: {},
-    commands: [roll],
-});
+#[group]
+#[commands(roll)]
+pub struct ROLL;
 
 #[command]
 fn roll(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {

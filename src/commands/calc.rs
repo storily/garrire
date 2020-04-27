@@ -8,11 +8,9 @@ use serenity::{
     model::channel::Message,
 };
 
-group!({
-    name: "calc",
-    options: {},
-    commands: [calc],
-});
+#[group]
+#[commands(calc)]
+struct CALC;
 
 #[cfg(feature = "calc-rhai")]
 #[command]

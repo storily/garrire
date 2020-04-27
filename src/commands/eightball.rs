@@ -6,14 +6,11 @@ use serenity::framework::standard::{
 };
 use serenity::model::channel::Message;
 
-group!({
-    name: "eightball",
-    options: {
-        prefix: "8ball",
-        default_command: eightball
-    },
-    commands: [eightball],
-});
+#[group]
+#[prefix = "8ball"]
+#[commands(eightball)]
+#[default_command(eightball)]
+struct EIGHTBALL;
 
 #[command]
 fn eightball(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {

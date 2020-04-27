@@ -6,10 +6,9 @@ use serenity::framework::standard::{
 };
 use serenity::model::channel::Message;
 
-group!({
-    name: "plot",
-    commands: [plot],
-});
+#[group]
+#[commands(plot)]
+pub struct PLOT;
 
 #[command]
 fn plot(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
