@@ -67,6 +67,7 @@ impl std::fmt::Display for Roll {
 pub struct ROLL;
 
 #[command]
+#[aliases("die", "dice", "d")]
 fn roll(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     get_help!(on_empty, "roll", ctx, msg, args);
 

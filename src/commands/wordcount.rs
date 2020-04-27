@@ -22,6 +22,7 @@ pub struct User {
 }
 
 #[command]
+#[aliases("count", "wordcount", "!")]
 fn wc(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     use crate::{locale_args, Locale};
     get_help!("wordcount", ctx, msg, args);

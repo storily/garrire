@@ -1,4 +1,4 @@
-use crate::{get_help, Locale};
+use crate::get_help;
 use serenity::client::Context;
 use serenity::framework::standard::{
     macros::{command, group},
@@ -11,6 +11,7 @@ use serenity::model::channel::Message;
 pub struct PALINDROME;
 
 #[command]
+#[aliases("pal")]
 fn palindrome(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
     use crate::palindromic::next_palindromic;
     get_help!(on_empty, "palindrome", ctx, msg, args);

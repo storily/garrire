@@ -14,6 +14,7 @@ struct CALC;
 
 #[cfg(feature = "calc-rhai")]
 #[command]
+#[aliases("=")]
 fn calc(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     get_help!(on_empty, "calc", ctx, msg, args);
 

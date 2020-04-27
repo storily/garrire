@@ -8,13 +8,12 @@ use serenity::{
     model::channel::Message,
 };
 
-group!({
-    name: "colour",
-    options: {},
-    commands: [colour],
-});
+#[group]
+#[commands(colour)]
+struct COLOUR;
 
 #[command]
+#[aliases("color")]
 fn colour(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
     get_help!("colour", ctx, msg, args);
 

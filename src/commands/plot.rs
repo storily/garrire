@@ -11,6 +11,7 @@ use serenity::model::channel::Message;
 pub struct PLOT;
 
 #[command]
+#[aliases("prompt")]
 fn plot(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     get_help!("plot", ctx, msg, args);
     msg.channel_id.say(
