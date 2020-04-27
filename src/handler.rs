@@ -1,9 +1,10 @@
 use log::info;
-use serenity::client::{Context, EventHandler};
-use serenity::model::channel::Message;
-use serenity::model::gateway::Ready;
+use serenity::{
+    client::{Context, EventHandler},
+    model::{channel::Message, gateway::Ready},
+};
 
-use crate::{DbPool, Settings};
+use crate::{voice, DbPool, Settings};
 
 pub struct Database;
 impl typemap::Key for Database {
@@ -12,6 +13,14 @@ impl typemap::Key for Database {
 
 pub struct Handler {
     pub db: DbPool,
+}
+
+macro_rules! regex {
+    ($name:ident, $re:literal $(,)?) => {{
+        static $name: ::once_cell::sync::OnceCell<::regex::Regex> =
+            ::once_cell::sync::OnceCell::new();
+        $name.get_or_init(|| ::regex::Regex::new($re).unwrap())
+    }};
 }
 
 impl EventHandler for Handler {
@@ -28,6 +37,16 @@ impl EventHandler for Handler {
 
         let member = msg.member(&ctx.cache);
         let channel = msg.channel(&ctx.cache);
+
+        if let Some(guild) = msg.guild(&ctx.cache) {
+            if regex!(RE_NEAR, r"Wordwar \d+ is starting in 30 seconds!").is_match(&msg.content) {
+                voice::ding(voice::Ding::WordwarNear, &ctx, guild);
+            } else if regex!(RE_START, r"Wordwar \d+ is starting now!").is_match(&msg.content) {
+                voice::ding(voice::Ding::WordwarStart, &ctx, guild);
+            } else if regex!(RE_END, r"Wordwar \d+ has_ended!").is_match(&msg.content) {
+                voice::ding(voice::Ding::WordwarEnd, &ctx, guild);
+            }
+        }
 
         info!(
             "[{}] [{}] {}",

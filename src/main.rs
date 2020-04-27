@@ -3,8 +3,10 @@ extern crate rust_embed;
 #[macro_use]
 extern crate diesel;
 
-pub(crate) use locale::Locale;
 use log::{debug, error, info};
+use std::sync::Arc;
+
+pub(crate) use locale::Locale;
 pub(crate) use settings::{DbPool, Settings};
 
 #[macro_use]
@@ -17,6 +19,7 @@ mod nanowrimo;
 mod palindromic;
 mod schema;
 mod settings;
+mod voice;
 
 fn main() {
     #[cfg(debug_assertions)]
@@ -49,6 +52,12 @@ fn start() -> error::Result<()> {
 
     info!("Preparing discord client...");
     let mut client = settings.discord.client(pool.clone());
+
+    info!("Vocalising...");
+    {
+        let mut data = client.data.write();
+        data.insert::<voice::Manager>(Arc::clone(&client.voice_manager));
+    }
 
     info!("Selecting commands...");
     client.with_framework(settings.discord.framework());
