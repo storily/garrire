@@ -7,7 +7,7 @@ use serenity::{
         prelude::{ChannelId, GuildId},
     },
     prelude::{Mutex, RwLock, TypeMapKey},
-    voice::dca,
+    voice::ffmpeg,
 };
 use std::sync::Arc;
 
@@ -23,7 +23,7 @@ impl Ding {
         match self {
             Self::WordwarNear => "voice/crotales.mp3",
             Self::WordwarStart => "voice/vibraphone.mp3",
-            Self::WordwarEnd => "voice/glockenspiel.dca",
+            Self::WordwarEnd => "voice/glockenspiel.mp3",
         }
     }
 }
@@ -50,9 +50,9 @@ pub(crate) fn ding(ding: Ding, ctx: &Context, guild: Arc<RwLock<Guild>>) {
         // handler.listen(Some(Box::new(Receiver::new())));
         info!("Joined {}", connect_to.mention());
 
-        match dca(ding.file()) {
+        match ffmpeg(ding.file()) {
             Ok(stream) => handler.play(stream),
-            Err(err) => error!("Error opening dca source '{}': {:?}", ding.file(), err),
+            Err(err) => error!("Error opening ffmpeg source '{}': {}", ding.file(), err),
         }
     } else {
         info!("Error joining the channel");

@@ -17,13 +17,6 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - name: cache target
-        uses: actions/cache@preview
-        with:
-          path: target/release/build
-          key: ${{ runner.os }}-target.release.build-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-target.release.build-
       - name: build in release mode
         uses: actions-rs/cargo@v1
         with:
@@ -35,13 +28,8 @@ jobs:
           mkdir -p release
           cp target/release/garrīre release/
           cp Example.Settings.toml release/
+          cp -r voice release/
           tar caf release.tar.xz release
-      - name: upload built artifact
-        uses: actions/upload-artifact@master
-        with:
-          name: release
-          path: release
-          overwrite: true
       - name: upload artifact to condere
         uses: appleboy/scp-action@master
         with:
