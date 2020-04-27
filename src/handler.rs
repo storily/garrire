@@ -38,13 +38,20 @@ impl EventHandler for Handler {
         let member = msg.member(&ctx.cache);
         let channel = msg.channel(&ctx.cache);
 
-        if let Some(guild) = msg.guild(&ctx.cache) {
-            if regex!(RE_NEAR, r"Wordwar \d+ is starting in 30 seconds!").is_match(&msg.content) {
-                voice::ding(voice::Ding::WordwarNear, &ctx, guild);
-            } else if regex!(RE_START, r"Wordwar \d+ is starting now!").is_match(&msg.content) {
-                voice::ding(voice::Ding::WordwarStart, &ctx, guild);
-            } else if regex!(RE_END, r"Wordwar \d+ has_ended!").is_match(&msg.content) {
-                voice::ding(voice::Ding::WordwarEnd, &ctx, guild);
+        if let (Some(guild), Ok(current), Some(member)) = (
+            &msg.guild(&ctx.cache),
+            &ctx.http.get_current_user(),
+            &member,
+        ) {
+            if Settings::load().debug || current.id == member.user_id() {
+                if regex!(RE_NEAR, r"Wordwar \d+ is starting in 30 seconds!").is_match(&msg.content)
+                {
+                    voice::ding(voice::Ding::WordwarNear, &ctx, guild.clone());
+                } else if regex!(RE_START, r"Wordwar \d+ is starting now!").is_match(&msg.content) {
+                    voice::ding(voice::Ding::WordwarStart, &ctx, guild.clone());
+                } else if regex!(RE_END, r"Wordwar \d+ has ended!").is_match(&msg.content) {
+                    voice::ding(voice::Ding::WordwarEnd, &ctx, guild.clone());
+                }
             }
         }
 
