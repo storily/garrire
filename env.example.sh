@@ -1,0 +1,5 @@
+export DISCORD_TOKEN=''
+export ACCORD_TARGET='http://localhost:8265'
+export ACCORD_BIND='localhost:8266'
+export ACCORD_COMMAND_MATCH='^~\w+'
+export ACCORD_COMMAND_PARSE='(?:^~|\s+)(\w+)'
