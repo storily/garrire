@@ -39,17 +39,43 @@ class Controller
     return trim(substr($content, strlen($known)));
   }
 
+  protected function end(): void
+  {
+    throw new End;
+  }
+
   protected function redirect(string $url): void
   {
     http_response_code(302);
     header('location: '.$url);
-    throw new End;
+    $this->end();
   }
 
-  protected function reply_once(string $reply): void
+  private $type_sent = false;
+  protected function send_type(string $type): void
   {
-    header('content-type: text/plain');
-    echo $reply;
-    throw new End;
+    if (!$this->type_sent) {
+      header("content-type: $type");
+      $this->type_sent = $type;
+    } else if ($this->type_sent != $type) {
+      throw new ReplyTypeMismatch($this->type_sent, $type);
+    }
+  }
+
+  protected function reply(string $content, int $channel_id = null, bool $once = false): void
+  {
+    $this->send_type('application/json');
+    $act = json_encode([ 'create-message' => array_filter([
+      'content' => $content,
+      'channel_id' => $channel_id,
+    ]) ]);
+
+    if ($once) {
+      header('content-length: ' . strlen($act));
+      echo $act;
+      $this->end();
+    } else {
+      echo $act . str_repeat(' ', 4096) . "\n";
+    }
   }
 }
