@@ -17,7 +17,6 @@ class Roll extends \App\Controller
 
     $all = [];
     foreach (preg_split('/\s+/', $this->argument()) as $arg) {
-      error_dump($arg);
       if (!preg_match('/(\d*)d(\d+)/i', $arg, $matches)) {
         $this->show_help();
       }
@@ -34,7 +33,7 @@ class Roll extends \App\Controller
       $all[] = implode(' ', array_map(
         fn ($throw) => "**$throw**",
         $throws
-      )) . ' = ' . $total;
+      )) . (count($throws) > 1 ? (' = ' . $total) : '');
     }
 
     $this->reply(implode("\n", $all), null, true);
