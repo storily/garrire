@@ -39,14 +39,29 @@ class Controller
     return trim(substr($content, strlen($known)));
   }
 
+  protected function help(): void
+  {
+    if (preg_match('/^-{0,2}help$/i', $this->argument())) {
+      $this->show_help();
+    }
+  }
+
+  protected function show_help(): void
+  {
+    $klass = explode("\\", static::class);
+    $klass = end($klass);
+    $name = strtolower($klass);
+    $this->redirect("/command/help/$name");
+  }
+
   protected function end(): void
   {
     throw new End;
   }
 
-  protected function redirect(string $url): void
+  protected function redirect(string $url, int $code = 307): void
   {
-    http_response_code(302);
+    http_response_code($code);
     header('location: '.$url);
     $this->end();
   }

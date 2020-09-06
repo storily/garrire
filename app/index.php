@@ -10,8 +10,20 @@ function error_dump($arg): void
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = strtolower($_SERVER['REQUEST_METHOD']);
 
-// TODO: navigation-style resolving, rewriting, and restricting
-$controller = '\\App\\Controllers' . implode('\\', array_map(fn ($seg) => ucfirst(strtolower($seg)), explode('/', $path)));
+$attempts = [];
+$segs = array_filter(explode('/', $path));
+foreach (array_keys($segs) as $i) {
+  $parts = array_slice($segs, 0, $i);
+  $attempts[] = implode('\\', array_map(fn ($seg) => ucfirst(strtolower($seg)), $parts));
+}
+
+$attempts = array_reverse($attempts);
+
+// TODO: navigation-style resolving (aliases), rewriting, and restricting
+foreach ($attempts as $attempt) {
+  $controller = '\\App\\Controllers\\' . $attempt;
+  if (class_exists($controller)) break;
+}
 
 try {
   $instance = new $controller;
