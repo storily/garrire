@@ -13,7 +13,7 @@ class Controller
     if (!empty($body)) {
       $payload = json_decode($body, true);
       if (!empty($payload['command'])) {
-        $this->command = $payload['command'];
+        $this->command = $payload['command'][0];
         $this->payload = $payload['message'];
       } else {
         $this->payload = $payload;
@@ -34,7 +34,7 @@ class Controller
     $prefix = $content[0] ?? null;
     if (!$prefix) return null;
 
-    $known = $prefix . implode(' ', $this->command);
+    $known = $prefix . $this->command;
     if (strpos($content, $known) !== 0) return null;
     return trim(substr($content, strlen($known)));
   }

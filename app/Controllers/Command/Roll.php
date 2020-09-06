@@ -17,6 +17,7 @@ class Roll extends \App\Controller
 
     $all = [];
     foreach (preg_split('/\s+/', $this->argument()) as $arg) {
+      error_dump($arg);
       if (!preg_match('/(\d*)d(\d+)/i', $arg, $matches)) {
         $this->show_help();
       }
