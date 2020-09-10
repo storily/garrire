@@ -1,4 +1,5 @@
 `~roll`: Roll some dice by tabletop notation (e.g. `3d20`)
 `~8ball`: Ask a question, get an answer.
+`~choose`: Choose between several items (separated by `or`).
 
 Also see `~help [command]` or `~[command] help` for more details on each.
