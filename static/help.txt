@@ -3,5 +3,6 @@
 `~choose`: Choose between several items (separated by `or`).
 `~colour`: Get a random colour.
 `~motivate`: Motivational messages as a service.
+`~palindrome`: Find the nearest greater palindrome number.
 
 Also see `~help [command]` or `~[command] help` for more details on each.

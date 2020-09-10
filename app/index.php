@@ -17,6 +17,7 @@ const ALIASES = [
   'color' => 'Colour',
   'motivation' => 'Motivate',
   'advice' => 'Motivate',
+  'pal' => 'Palindrome',
 ];
 
 $segs = array_filter(explode('/', strtolower($path)));
@@ -47,7 +48,6 @@ foreach ($ksegs as $k) {
 usort($attempts, fn ($a, $b) => strlen($a) <=> strlen($b));
 
 foreach (array_reverse($attempts) as $attempt) {
-  error_dump($attempt);
   $controller = '\\App\\Controllers\\' . $attempt;
   if (class_exists($controller)) break;
 }
