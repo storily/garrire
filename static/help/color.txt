@@ -1,0 +1,2 @@
+`~colour` (alias: `~color`)
+**Get a random colour.**

@@ -14,6 +14,9 @@ const ALIASES = [
   'die' => 'Roll',
   'dice' => 'Roll',
   '8ball' => 'EightBall',
+  'color' => 'Colour',
+  'motivation' => 'Motivate',
+  'advice' => 'Motivate',
 ];
 
 $segs = array_filter(explode('/', strtolower($path)));

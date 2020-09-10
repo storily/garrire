@@ -1,0 +1,2 @@
+`~motivate` (aliases: `~advice`, `~motivation`)
+**Motivational messages as a service.**

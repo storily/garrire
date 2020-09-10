@@ -32,7 +32,7 @@ class Help
       .take_while { |line| has_triple_slash_comment? line }
       .map { |line| line.sub(%r{^\s*///\s+}, '').chomp }
     head = comment.take_while { |line| not line.empty? }
-    tail = comment[(head.length + 1)..]
+    tail = comment[(head.length + 1)..] || []
 
     head = head.join(' ')
     long_help = tail.join(' ')
@@ -40,7 +40,7 @@ class Help
     m = %r{^(?<name>\S+)\s+(?:\((?<aliases>[^)]+)\))?\s*[:\-—–|]\s*(?<short>.*)$}.match(head)
     name = m['name']
     short_help = m['short']
-    aliases = (m['aliases'] || '').split(',').map(&:strip)
+    aliases = (m['aliases'] || '').split(',').map(&:strip).sort
 
     self.new prefix, name, aliases, short_help, long_help
   end
