@@ -2,8 +2,8 @@
 
 /// roll (dice, die) - Roll some dice by tabletop notation (e.g. `3d20`)
 ///
-/// Notation is `[N]d[M]`, where `[N]` is the number of rolls to make with
-/// an `[M]`-sided die. `[N]` is optional and defaults to 1. You can roll
+/// Notation is `[N]d[M]`, where `[N]` is the number of rolls (default 1)
+/// to make with an `[M]`-sided die (default 6 sides). You can roll
 /// multiple dice at once, e.g. `1d20 2d10 3d5`. Sides don't have to make
 /// physical sense: a `d2` is possible, as is a `d1`, as is a `d1927362`.
 
@@ -16,8 +16,8 @@ class Roll extends \App\Controller
     $this->help();
 
     $all = [];
-    foreach (preg_split('/\s+/', $this->argument()) as $arg) {
-      if (!preg_match('/(\d*)d(\d+)/i', $arg, $matches)) {
+    foreach (preg_split('/\s+/', $this->argument() ?: 'd') as $arg) {
+      if (!preg_match('/(\d*)d(\d*)/i', $arg, $matches)) {
         $this->show_help();
       }
 
