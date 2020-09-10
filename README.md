@@ -12,6 +12,8 @@ technology, if I so choose.
 And indeed, if you want to contribute a feature, you can write it in whatever you
 want, as long as I can make it run on the sassbot server.
 
+[Accord]: https://github.com/passcod/accord
+
 ## Commands: technology
 
 - `roll`: PHP
