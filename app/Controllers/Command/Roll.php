@@ -1,6 +1,6 @@
 <?php
 
-/// roll (dice, die) - Roll some dice by tabletop notation (e.g. `3d20`)
+/// roll (dice, die) - Roll some dice by tabletop notation (e.g. `3d20`).
 ///
 /// Notation is `[N]d[M]`, where `[N]` is the number of rolls (default 1)
 /// to make with an `[M]`-sided die (default 6 sides). You can roll
