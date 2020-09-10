@@ -46,11 +46,12 @@ class Controller
     }
   }
 
+  protected const HELP_NAME = null;
   protected function show_help(): void
   {
     $klass = explode("\\", static::class);
     $klass = end($klass);
-    $name = strtolower($klass);
+    $name = static::HELP_NAME ?? strtolower($klass);
     $this->redirect("/command/help/$name");
   }
 

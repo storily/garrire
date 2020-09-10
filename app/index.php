@@ -11,8 +11,9 @@ $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = strtolower($_SERVER['REQUEST_METHOD']);
 
 const ALIASES = [
-  'die' => 'roll',
-  'dice' => 'roll',
+  'die' => 'Roll',
+  'dice' => 'Roll',
+  '8ball' => 'EightBall',
 ];
 
 $segs = array_filter(explode('/', strtolower($path)));
@@ -23,8 +24,6 @@ foreach ($ksegs as $i) {
   $parts = array_slice($segs, 0, $i);
   $attempts[] = implode('\\', array_map(fn ($seg) => ucfirst($seg), $parts));
 }
-
-$attempts = array_reverse($attempts);
 
 // Run through the segments, each time replacing one of them with the aliasing.
 foreach ($ksegs as $k) {
@@ -39,10 +38,13 @@ foreach ($ksegs as $k) {
     $sub_attempts[] = implode('\\', array_map(fn ($seg) => ucfirst($seg), $parts));
   }
 
-  $attempts = array_merge($attempts, array_reverse($sub_attempts));
+  $attempts = array_unique(array_merge($attempts, $sub_attempts));
 }
 
-foreach ($attempts as $attempt) {
+usort($attempts, fn ($a, $b) => strlen($a) <=> strlen($b));
+
+foreach (array_reverse($attempts) as $attempt) {
+  error_dump($attempt);
   $controller = '\\App\\Controllers\\' . $attempt;
   if (class_exists($controller)) break;
 }

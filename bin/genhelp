@@ -40,7 +40,7 @@ class Help
     m = %r{^(?<name>\S+)\s+(?:\((?<aliases>[^)]+)\))?\s*[:\-—–|]\s*(?<short>.*)$}.match(head)
     name = m['name']
     short_help = m['short']
-    aliases = m['aliases'].split(',').map(&:strip)
+    aliases = (m['aliases'] || '').split(',').map(&:strip)
 
     self.new prefix, name, aliases, short_help, long_help
   end
