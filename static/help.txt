@@ -4,5 +4,6 @@
 `~colour`: Get a random colour.
 `~motivate`: Motivational messages as a service.
 `~palindrome`: Find the nearest greater palindrome number.
+`~pick`: Select a number from a range, or find random items.
 
 Also see `~help [command]` or `~[command] help` for more details on each.

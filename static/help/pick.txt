@@ -1,0 +1,5 @@
+`~pick`
+**Select a number from a range, or find random items.**
+You can pick between two numbers using one of the following forms: `1-10`, `2 20`, `3..31` (top-exclusive), `4...40` (top-inclusive). If you use the forms without spaces you can specify multiple ranges at once to pick simultaneously, e.g. `1-60 1-60 1-24`. If you give only one number, the range starts from 1 to that number.
+
+Specials: if you add any of the following words after a range or number, or on its own, you will obtain random items matching the category: `month`, `flower`, `food`, `colour`, `fruit`, `plant`, `animal`, `sport`, `season`. Plurals and some alternative spellings are also accepted.

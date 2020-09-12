@@ -1,86 +1,88 @@
 #!/usr/bin/env ruby
 
 def main(prefix)
-  helps = []
+	helps = []
 
-  Dir['app/Controllers/**/*.php'].each do |file|
-    puts "Processing #{file}"
-    helps << Help.extract_from_php(file, prefix)
-  end
+	Dir['app/Controllers/**/*.php'].each do |file|
+		puts "Processing #{file}"
+		helps << Help.extract_from_php(file, prefix)
+	end
 
-  helps.each do |help|
-    help.write_command!
-  end
+	helps.each do |help|
+		help.write_command!
+	end
 
-  main_file = "static/help.txt"
-  main_help = helps.map(&:oneline).join("\n") +
-    "\n\nAlso see `#{prefix}help [command]` or `#{prefix}[command] help` for more details on each."
+	main_file = "static/help.txt"
+	main_help = helps.map(&:oneline).join("\n") +
+		"\n\nAlso see `#{prefix}help [command]` or `#{prefix}[command] help` for more details on each."
 
-  puts "Writing #{main_file}"
-  File.write main_file, main_help
+	puts "Writing #{main_file}"
+	File.write main_file, main_help
 end
 
 def has_triple_slash_comment?(line)
-  line.start_with?(%r{\s*///})
+	line.start_with?(%r{\s*///})
 end
 
 class Help
-  def self.extract_from_php(filepath, prefix)
-    file = File.read(filepath).lines
-    comment_start = file.find_index { |line| has_triple_slash_comment? line }
-    comment = file[comment_start..]
-      .take_while { |line| has_triple_slash_comment? line }
-      .map { |line| line.sub(%r{^\s*///\s+}, '').chomp }
-    head = comment.take_while { |line| not line.empty? }
-    tail = comment[(head.length + 1)..] || []
+	def self.extract_from_php(filepath, prefix)
+		file = File.read(filepath).lines
+		comment_start = file.find_index { |line| has_triple_slash_comment? line }
+		comment = file[comment_start..]
+			.take_while { |line| has_triple_slash_comment? line }
+			.map { |line| line.sub(%r{^\s*///\s+}, '').chomp }
+		head = comment.take_while { |line| not line.empty? }
+		tail = comment[(head.length + 1)..] || []
 
-    head = head.join(' ')
-    long_help = tail.join(' ')
+		head = head.join(' ')
+		long_help = tail.join(' ').gsub('  ', "\n\n").gsub(' ', ' ')
+		#                      ^         ^^                 ^
+		# Confused? These spaces marked above are actually nbsp!
 
-    m = %r{^(?<name>\S+)\s+(?:\((?<aliases>[^)]+)\))?\s*[:\-—–|]\s*(?<short>.*)$}.match(head)
-    name = m['name']
-    short_help = m['short']
-    aliases = (m['aliases'] || '').split(',').map(&:strip).sort
+		m = %r{^(?<name>\S+)\s+(?:\((?<aliases>[^)]+)\))?\s*[:\-—–|]\s*(?<short>.*)$}.match(head)
+		name = m['name']
+		short_help = m['short']
+		aliases = (m['aliases'] || '').split(',').map(&:strip).sort
 
-    self.new prefix, name, aliases, short_help, long_help
-  end
+		self.new prefix, name, aliases, short_help, long_help
+	end
 
-  def initialize(prefix, name, aliases, short, long)
-    @prefix = prefix
-    @name = name
-    @aliases = aliases
-    @short = short
-    @long = long
-  end
+	def initialize(prefix, name, aliases, short, long)
+		@prefix = prefix
+		@name = name
+		@aliases = aliases
+		@short = short
+		@long = long
+	end
 
-  def write_command!
-    aliases = if @aliases.empty?
-                ''
-              else
-                wal = if @aliases.length == 1
-                        'alias'
-                      else
-                        'aliases'
-                      end
-                "(#{wal}: #{@aliases.map{|a|"`#{@prefix}#{a}`"}.join(', ')})"
-              end
+	def write_command!
+		aliases = if @aliases.empty?
+			''
+			else
+			wal = if @aliases.length == 1
+				'alias'
+				else
+				'aliases'
+			end
+			"(#{wal}: #{@aliases.map{|a|"`#{@prefix}#{a}`"}.join(', ')})"
+		end
 
-    help = "
-      `#{@prefix}#{@name}` #{aliases}
-      **#{@short}**
-      #{@long}
-    ".lines.map(&:strip).join("\n").strip
+		help = "
+			`#{@prefix}#{@name}` #{aliases}
+			**#{@short}**
+			#{@long}
+		".lines.map(&:strip).join("\n").strip
 
-    [@name, *@aliases].each do |name|
-      helpfile = "static/help/#{name}.txt"
-      puts "Writing #{helpfile}"
-      File.write helpfile, help
-    end
-  end
+		[@name, *@aliases].each do |name|
+			helpfile = "static/help/#{name}.txt"
+			puts "Writing #{helpfile}"
+			File.write helpfile, help
+		end
+	end
 
-  def oneline
-    "`#{@prefix}#{@name}`: #{@short}".strip
-  end
+	def oneline
+		"`#{@prefix}#{@name}`: #{@short}".strip
+	end
 end
 
 main(ARGV[0] || '!')
