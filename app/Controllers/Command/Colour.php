@@ -2,9 +2,10 @@
 
 /// colour (color) - Get a random colour.
 
-namespace App\Controllers\Command;
+declare(strict_types=1);
+namespace Controllers\Command;
 
-class Colour extends \App\Controller
+class Colour extends \Controller
 {
   const COLOURS = [
     'silver',

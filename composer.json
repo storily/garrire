@@ -9,11 +9,13 @@
             "email": "felix@passcod.name"
         }
     ],
-    "minimum-stability": "dev",
-    "require": {},
+    "minimum-stability": "stable",
+    "require": {
+        "doctrine/orm": "^2.7.3"
+    },
     "autoload": {
         "psr-4": {
-            "App\\": "app/"
+            "": "app/"
         }
     }
 }

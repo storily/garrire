@@ -2,9 +2,10 @@
 
 /// motivate (motivation, advice) - Motivational messages as a service.
 
-namespace App\Controllers\Command;
+declare(strict_types=1);
+namespace Controllers\Command;
 
-class Motivation extends \App\Controller
+class Motivation extends \Controller
 {
   const MOTIVES = [
     'Reality cannot destroy you.',

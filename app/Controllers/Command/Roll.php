@@ -7,9 +7,10 @@
 /// multiple dice at once, e.g. `1d20 2d10 3d5`. Sides don't have to make
 /// physical sense: a `d2` is possible, as is a `d1`, as is a `d1927362`.
 
-namespace App\Controllers\Command;
+declare(strict_types=1);
+namespace Controllers\Command;
 
-class Roll extends \App\Controller
+class Roll extends \Controller
 {
   public function post(): void
   {

@@ -9,9 +9,10 @@
 
 // TODO: With no argument, pull user's wordcount from nano.org.
 
-namespace App\Controllers\Command;
+declare(strict_types=1);
+namespace Controllers\Command;
 
-class Palindrome extends \App\Controller
+class Palindrome extends \Controller
 {
   public function post(): void
   {

@@ -1,6 +1,7 @@
 <?php
 
-namespace App;
+declare(strict_types=1);
+namespace Exceptions;
 
 class ReplyTypeMismatch extends \Exception
 {

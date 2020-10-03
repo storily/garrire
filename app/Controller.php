@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+declare(strict_types=1);
 
 class Controller
 {
@@ -57,7 +57,7 @@ class Controller
 
   protected function end(): void
   {
-    throw new End;
+    throw new Exceptions\End;
   }
 
   protected function redirect(string $url, int $code = 307): void
@@ -74,7 +74,7 @@ class Controller
       header("content-type: $type");
       $this->type_sent = $type;
     } else if ($this->type_sent != $type) {
-      throw new ReplyTypeMismatch($this->type_sent, $type);
+      throw new Exceptions\ReplyTypeMismatch($this->type_sent, $type);
     }
   }
 

@@ -12,9 +12,10 @@
 /// side-effect arising from, out of, or in connection with the answer or the
 /// use of or other dealings with the answer.
 
-namespace App\Controllers\Command;
+declare(strict_types=1);
+namespace Controllers\Command;
 
-class EightBall extends \App\Controller
+class EightBall extends \Controller
 {
   const HELP_NAME = '8ball';
 

@@ -1,11 +1,7 @@
 <?php
 
-require_once('../vendor/autoload.php');
-
-function error_dump($arg): void
-{
-  error_log(var_export($arg, true));
-}
+declare(strict_types=1);
+require_once('bootstrap.php');
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = strtolower($_SERVER['REQUEST_METHOD']);
@@ -48,7 +44,7 @@ foreach ($ksegs as $k) {
 usort($attempts, fn ($a, $b) => strlen($a) <=> strlen($b));
 
 foreach (array_reverse($attempts) as $attempt) {
-  $controller = '\\App\\Controllers\\' . $attempt;
+  $controller = '\\Controllers\\' . $attempt;
   if (class_exists($controller)) break;
 }
 
@@ -62,7 +58,7 @@ try {
 
 try {
   $instance->$method();
-} catch (\App\End $end) {
+} catch (\Exceptions\End $end) {
   exit;
 } catch (\Throwable $err) {
   error_dump("$err");

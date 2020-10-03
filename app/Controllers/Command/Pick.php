@@ -13,9 +13,10 @@
 /// `flower`, `food`, `colour`, `fruit`, `plant`, `animal`, `sport`, `season`.
 /// Plurals and some alternative spellings are also accepted.
 
-namespace App\Controllers\Command;
+declare(strict_types=1);
+namespace Controllers\Command;
 
-class Pick extends \App\Controller
+class Pick extends \Controller
 {
 	private const SPECIALS = [
 		'month' => 'month',

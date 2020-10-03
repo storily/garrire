@@ -4,9 +4,10 @@
 ///
 /// Separate items by the word `or`. One will be chosen at random.
 
-namespace App\Controllers\Command;
+declare(strict_types=1);
+namespace Controllers\Command;
 
-class Choose extends \App\Controller
+class Choose extends \Controller
 {
   public function post(): void
   {
