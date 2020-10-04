@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+name=$(tr '[:upper:]' '[:lower:]' <<< "$@" | sed -E -e 's/\W+/_/g' -e 's/^_+//' -e 's/_+$//' )
+: ${name:=migration}
+
+vdate=$(date +'%y%j')
+vord=$(ls "migrations/U${vdate}"* 2>/dev/null | sort -r | head -n1 | cut -d/ -f2 | cut -c7-8 || echo 0)
+((vord += 1))
+vrand=$(openssl rand -hex 1 | tr 'a-f' '0-5')
+version=$(printf '%s%02d%03d' "$vdate" "$vord" "$vrand")
+# date (5 digits) as first distinguisher and for ordering
+# increment (2 digits) to differentiate on same day
+# padding (1 digit, always 0) for human parsing ease
+# random (2 digits) to avoid collisions on diff branches
+#
+# will cease fitting in a u32 in 2042...
+# https://github.com/rust-db/refinery/issues/83
+
+filename="migrations/U${version}__${name}.sql"
+echo "$filename"
+touch "$filename"
+git add "$filename"
+
+: ${editor:="$VISUAL"}
+: ${editor:="$EDITOR"}
+: ${editor:=nano}
+exec "$editor" "$filename"

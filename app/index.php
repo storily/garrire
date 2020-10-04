@@ -3,8 +3,8 @@
 declare(strict_types=1);
 require_once('bootstrap.php');
 
-$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$method = strtolower($_SERVER['REQUEST_METHOD']);
+$path = parse_url($_SERVER['REQUEST_URI'] ?? '/roll/d6', PHP_URL_PATH);
+$method = strtolower($_SERVER['REQUEST_METHOD'] ?? 'POST');
 
 const ALIASES = [
   'die' => 'Roll',
@@ -16,40 +16,42 @@ const ALIASES = [
   'pal' => 'Palindrome',
 ];
 
-$segs = array_filter(explode('/', strtolower($path)));
-$ksegs = array_keys($segs);
-
-$attempts = [];
-foreach ($ksegs as $i) {
-  $parts = array_slice($segs, 0, $i);
-  $attempts[] = implode('\\', array_map(fn ($seg) => ucfirst($seg), $parts));
+$lcpath = strtolower($path);
+$prefix = array_values(array_filter(explode('/', $lcpath)))[0] ?? null;
+if (!$prefix) {
+	http_response_code(404);
+	exit;
 }
 
-// Run through the segments, each time replacing one of them with the aliasing.
-foreach ($ksegs as $k) {
-  $subbed_segs = array_map(function ($j) use (&$segs) {
-    $sub = $segs[$j];
-    return ALIASES[$sub] ?? $sub;
-  }, $ksegs);
+$commands = Models\Command::query()
+	->where(fn ($q) => $q
+		->where('mode', '=', 'exact')
+		->where(function ($q) use ($path, $lcpath) {
+			$q->where('path', '=', $path);
+			if ($lcpath !== $path)
+				$q->orWhere('path', '=', $lcpath);
+		})
+	)
+	->orWhere(fn ($q) => $q
+		->where('mode', '=', 'glob')
+		->where('path', 'LIKE', "/{$prefix}/%")
+	)
+	->get();
 
-  $sub_attempts = [];
-  foreach ($ksegs as $i) {
-    $parts = array_slice($subbed_segs, 0, $i);
-    $sub_attempts[] = implode('\\', array_map(fn ($seg) => ucfirst($seg), $parts));
-  }
-
-  $attempts = array_unique(array_merge($attempts, $sub_attempts));
+$command = null;
+foreach ($commands as $command) {
+	if ($command->exact() || $command->glob($path) || ($path !== $lcpath ? $command->glob($lcpath) : false)) {
+		break;
+	}
 }
 
-usort($attempts, fn ($a, $b) => strlen($a) <=> strlen($b));
-
-foreach (array_reverse($attempts) as $attempt) {
-  $controller = '\\Controllers\\' . $attempt;
-  if (class_exists($controller)) break;
+if (!$command) {
+	http_response_code(404);
+	exit;
 }
 
 try {
-  $instance = new $controller;
+  $instance = $command->initiate();
 } catch (\Throwable $err) {
   error_dump("$err");
   http_response_code(404);

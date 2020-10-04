@@ -6,8 +6,9 @@ define('ROOT', realpath(__DIR__ . '/../'));
 
 require_once(ROOT.'/vendor/autoload.php');
 
-use Doctrine\ORM\Tools\Setup;
-use Doctrine\ORM\EntityManager;
+use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Container\Container;
 
 function error_dump($arg): void
 {
@@ -23,8 +24,19 @@ foreach (array_filter(
 	fn ($pair) => !!$pair && !in_array($pair[0], ['_', 'PWD', 'SHLVL'])
 ) as $envpair) $_ENV[$envpair[0]] = $envpair[1];
 
-define('DEV', $_ENV['PHP_ENV'] == 'development');
+define('ENVIRONMENT', $_ENV['PHP_ENV']);
+const DEVELOPMENT = 'development';
+const PRODUCTION = 'production';
 
-$entity_manager = EntityManager::create([
-	'url' => ($pf = $_ENV['DATABASE_URL_FILE'] ?? null) ? trim(file_get_contents($pf)) : $_ENV['DATABASE_URL'],
-], Setup::createAnnotationMetadataConfiguration([ROOT.'/app/entities'], DEV));
+$capsule = new Capsule;
+$capsule->addConnection([
+    'driver'    => 'mysql',
+    'host'      => $_ENV['DATABASE_HOST'],
+    'database'  => $_ENV['DATABASE_NAME'],
+    'username'  => $_ENV['DATABASE_USER'],
+    'password'  => ($pf = $_ENV['DATABASE_PASSWORD_FILE'] ?? null) ? trim(file_get_contents($pf)) : $_ENV['DATABASE_PASSWORD'],
+]);
+
+$capsule->setEventDispatcher(new Dispatcher(new Container));
+$capsule->setAsGlobal();
+$capsule->bootEloquent();

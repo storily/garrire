@@ -9,4 +9,4 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 
 [*.json]
-indent_style = 4
+indent_style = space
