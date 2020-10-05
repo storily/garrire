@@ -16,9 +16,21 @@ class Command extends Model
 	{
 		if ($this->mode != 'glob') return false;
 
-		// TODO: match $path to $this->path using globs
-		// if matches, fill $this->params with each globbing
-		// and recompute $this->redirect if present
+		$regex = '|^' . str_replace('/\*', '(?:/([^/]+))?', preg_quote($this->path)) . '$|';
+
+		$path = rtrim($path, '/');
+		if (!preg_match($regex, $path, $matches)) return false;
+
+		foreach ($matches as $i => $match) {
+			if ($i == 0) continue;
+			$this->params[] = $match;
+		}
+
+		if (!empty($this->redirect)) {
+			foreach ($this->params as $i => $param) {
+				$this->redirect = str_replace('$' . ($i + 1), $param, $this->redirect);
+			}
+		}
 
 		return true;
 	}
