@@ -34,4 +34,6 @@ want, as long as I can make it run on the sassbot server.
 
 - Database migrations: plain SQL managed via [Refinery](https://github.com/rust-db/refinery).
 
+- Automated testing: Node.js.
+
 more tbd

@@ -1,3 +1,5 @@
-env.sh
 /vendor/
+/node_modules/
+
+env.sh
 refinery.toml
