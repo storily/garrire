@@ -21,19 +21,33 @@ want, as long as I can make it run on the sassbot server.
 0. Install migrator: `cargo install --git https://github.com/rust-db/refinery refinery_cli`.
 0. Create empty database and configure migrator: `refinery setup`.
 0. Migrate database: `bin/migrate`.
+0. Adjust your nginx config to have the following:
+   ```
+   upstream fpmpool { server unix:/run/php-fpm/php-fpm.sock; }
+   server {
+      listen 8265;
+      set $root /path/to/this/clone;
+      include /path/to/this/clone/nginx.conf;
+   }
+   ```
+0. Restart nginx.
+0. In one terminal, run `bin/start`.
+0. In another, run `bin/dump-server`.
+0. You'll probably want to have an nginx access log in a third.
+0. You're all set up! Issue commands in Discord and get coding...
 
 ## Tech
 
-- Top level routing: Nginx.
+ - Top level routing: Nginx.
 
-- PHP (7.4), via the FPM. I do PHP for my day job, so I'm super comfortable with
-  it. Cool features: every request, ie. every command run, is isolated; standard
-  library is large and ecosystem very mature; changes are live instantly.
+ - PHP (7.4), via the FPM. I do PHP for my day job, so I'm super comfortable with
+   it. Cool features: every request, ie. every command run, is isolated; standard
+   library is large and ecosystem very mature; changes are live instantly.
 
-- Static help files generator: Ruby.
+ - Static help files generator: Ruby.
 
-- Database migrations: plain SQL managed via [Refinery](https://github.com/rust-db/refinery).
+ - Database migrations: plain SQL managed via [Refinery](https://github.com/rust-db/refinery).
 
-- Automated testing: Node.js.
+ - Automated testing: Node.js.
 
 more tbd
