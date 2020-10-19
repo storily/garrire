@@ -52,4 +52,52 @@ class Command extends Model
 
 		return new $controller;
 	}
+
+	public static function handle(string $method, string $path)
+	{
+		$lcpath = strtolower($path);
+
+		$prefix = explode('/', $path)[1] ?? trim($path, '/');
+
+		$commands = self::query()
+			->where(fn ($q) => $q
+				->where('mode', '=', 'exact')
+				->where(function ($q) use ($path, $lcpath) {
+					$q->where('path', '=', $path);
+					if ($lcpath !== $path)
+						$q->orWhere('path', '=', $lcpath);
+				})
+			)
+			->orWhere(fn ($q) => $q
+				->where('mode', '=', 'glob')
+				->where('path', 'LIKE', "/{$prefix}/%")
+			)
+			->get();
+
+		$command = null;
+		foreach ($commands as $command) {
+			if ($command->exact() || $command->glob($path) || ($path !== $lcpath ? $command->glob($lcpath) : false)) {
+				break;
+			}
+		}
+
+		if (!$command) return http_response_code(404);
+
+		try {
+			$instance = $command->initiate();
+		} catch (\Throwable $err) {
+			dump($err);
+			return http_response_code(404);
+		}
+
+		try {
+			$instance->$method();
+		} catch (\Exceptions\End $end) {
+			return;
+		} catch (\Throwable $err) {
+			dump($err);
+			http_response_code(500);
+			echo "$err";
+		}
+	}
 }
