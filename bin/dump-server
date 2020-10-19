@@ -1,0 +1,29 @@
+#!/usr/bin/env php
+<?php
+require __DIR__.'/../vendor/autoload.php';
+
+use Symfony\Component\VarDumper\Cloner\Data;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\VarDumper\Dumper\CliDumper;
+use Symfony\Component\VarDumper\Dumper\HtmlDumper;
+use Symfony\Component\VarDumper\Server\DumpServer;
+use Symfony\Component\VarDumper\Command\Descriptor\CliDescriptor;
+use Symfony\Component\VarDumper\Command\Descriptor\HtmlDescriptor;
+
+$server = new DumpServer('tcp://127.0.0.1:9912');
+$descriptor = new CliDescriptor(new CliDumper);
+
+$io = new SymfonyStyle(new ArgvInput, new ConsoleOutput);
+$errorIo = $io->getErrorStyle();
+$errorIo->title('Laravel Var Dump Server');
+
+$server->start();
+
+$errorIo->success(sprintf('Server listening on %s', $server->getHost()));
+$errorIo->comment('Quit the server with CONTROL-C.');
+
+$server->listen(fn (Data $data, array $context, int $clientId) =>
+	$descriptor->describe($io, $data, $context, $clientId)
+);
