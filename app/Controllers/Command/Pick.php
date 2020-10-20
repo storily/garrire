@@ -19,27 +19,27 @@ namespace Controllers\Command;
 class Pick extends \Controller
 {
 	private const SPECIALS = [
-		'month' => 'month',
-		'months' => 'month',
+		'animal' => 'animal',
+		'animals' => 'animal',
+		'color' => 'colour',
+		'colors' => 'colour',
+		'colour' => 'colour',
+		'colours' => 'colour',
+		'feed' => 'food',
 		'flower' => 'flower',
 		'flowers' => 'flower',
 		'food' => 'food',
 		'foods' => 'food',
-		'feed' => 'food',
-		'colour' => 'colour',
-		'colours' => 'colour',
-		'color' => 'colour',
-		'colors' => 'colour',
+		'month' => 'month',
+		'months' => 'month',
+		'season' => 'season',
+		'seasons' => 'season',
 		// 'fruit' => 'fruit',
 		// 'fruits' => 'fruit',
 		// 'plant' => 'plant',
 		// 'plants' => 'plant',
-		'animal' => 'animal',
-		'animals' => 'animal',
 		'sport' => 'sport',
 		'sports' => 'sport',
-		'season' => 'season',
-		'seasons' => 'season',
 	];
 
 	public function post(): void
