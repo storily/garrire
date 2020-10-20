@@ -13,7 +13,7 @@ def main(prefix)
 	end
 
 	main_file = "static/help.txt"
-	main_help = helps.map(&:oneline).join("\n") +
+	main_help = helps.map(&:oneline).sort.join("\n") +
 		"\n\nAlso see `#{prefix}help [command]` or `#{prefix}[command] help` for more details on each."
 
 	puts "Writing #{main_file}"

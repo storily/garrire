@@ -1,9 +1,9 @@
-`~roll`: Roll some dice by tabletop notation (e.g. `3d20`).
 `~8ball`: Ask a question, get an answer.
 `~choose`: Choose between several items (separated by `or`).
 `~colour`: Get a random colour.
 `~motivate`: Motivational messages as a service.
 `~palindrome`: Find the nearest greater palindrome number.
 `~pick`: Select a number from a range, or find random items.
+`~roll`: Roll some dice by tabletop notation (e.g. `3d20`).
 
 Also see `~help [command]` or `~[command] help` for more details on each.
