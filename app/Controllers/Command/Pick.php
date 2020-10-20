@@ -46,6 +46,7 @@ class Pick extends \Controller
 	{
 		$this->help();
 		if (empty($arg = strtolower($this->argument()))) $this->show_help();
+		$arg = trim(str_replace([',', ';'], ' ', $arg));
 
 		if ($special = static::SPECIALS[$arg] ?? false) {
 			$arg = "1 $special";
@@ -56,6 +57,7 @@ class Pick extends \Controller
 			'/(?P<from>\d+|an?)(?:(?P<op> |\.{2,3}|-)(?P<to>\d+))?(?:\s+(?P<special>[a-z]+))?\b/i'
 		, $arg, $matches)) {
 			$this->reply('no match', null, true);
+			return;
 		}
 
 		$pickers = [];
@@ -64,16 +66,44 @@ class Pick extends \Controller
 				'from' => (int) preg_replace('/^an?$/', '1', $matches['from'][$n]),
 				'op' => $matches['op'][$n],
 				'to' => ($matches['to'][$n] !== '') ? ((int) $matches['to'][$n]) : null,
-				'special' => $matches['special'][$n],
+				'special' => static::SPECIALS[$matches['special'][$n]] ?? $matches['special'][$n],
 			];
 		}
 
 		$picks = [];
-		$picks[] = var_export($pickers, true);
 
 		// TODO: optimise to at most one query
-		foreach ($pickers as $picker) {
-			//
+		foreach ($pickers as $p) {
+			if ($p->to !== null) {
+				$sorted = [$p->from, $p->to];
+				sort($sorted);
+				[$from, $to] = $sorted;
+				if ($p->op == '..') $to -= 1;
+
+				$n = rand($from, $to);
+			} else {
+				if ($p->special) {
+					$n = $p->from;
+				} else {
+					$n = rand(1, $p->from);
+				}
+			}
+
+			if (!empty($p->special)) {
+				$model = '\\Models\\Pick'.ucfirst($p->special);
+				if (class_exists($model)) {
+					$q = $model::query();
+				} else {
+					$this->reply("unsupported category: `{$p->special}`");
+					return;
+				}
+
+				foreach ($q->inRandomOrder()->take($n)->get() as $spec) {
+					$picks[] = $spec->text;
+				}
+			} else {
+				$picks[] = $n;
+			}
 		}
 
 		$this->reply(implode(', ', array_map(fn ($pick) => "**$pick**", $picks)), null, true);
