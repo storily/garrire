@@ -10,7 +10,7 @@
 ///
 /// Specials: if you add any of the following words after a range or number,
 /// or on its own, you will obtain random items matching the category: `month`,
-/// `flower`, `food`, `colour`, `animal`, `sport`, `season`.
+/// `flower`, `food`, `colour`, `animal`, `season`.
 /// Plurals and some alternative spellings are also accepted.
 
 declare(strict_types=1);
@@ -38,8 +38,8 @@ class Pick extends \Controller
 		// 'fruits' => 'fruit',
 		// 'plant' => 'plant',
 		// 'plants' => 'plant',
-		'sport' => 'sport',
-		'sports' => 'sport',
+		// 'sport' => 'sport',
+		// 'sports' => 'sport',
 	];
 
 	public function post(): void
