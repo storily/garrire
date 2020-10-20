@@ -3,6 +3,7 @@
 declare(strict_types=1);
 namespace Models;
 
-class PickMonth extends Model
+class PickFood extends Model
 {
+	protected $table = 'pick_foods';
 }
