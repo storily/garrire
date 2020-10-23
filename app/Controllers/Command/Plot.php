@@ -2,7 +2,7 @@
 
 /// plot (prompt) - Random plots and prompts.
 ///
-/// You can optionally filter by category. Currently available:
+/// You can optionally filter by theme. Currently available:
 /// `general`, `fantasy`, `sci-fi`, `crime`.
 
 declare(strict_types=1);
@@ -14,9 +14,13 @@ class Plot extends \Controller
 	{
 		$this->help();
 
-		$plot = \Models\Plot::query()
-			->inRandomOrder()
-			->first();
+		$q = \Models\Plot::query();
+
+		if (!empty($arg = $this->argument())) {
+			$q = $q->where('theme', 'LIKE', "%{$arg}%");
+		}
+
+		$plot = $q->inRandomOrder()->first();
 
 		$this->reply(
 			sprintf("> %s\n— %s [**%s**]", $plot->text, $plot->author, $plot->theme),
