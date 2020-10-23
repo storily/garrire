@@ -30,6 +30,9 @@ class Command extends Model
 			foreach ($this->params as $i => $param) {
 				$this->redirect = str_replace('$' . ($i + 1), $param, $this->redirect);
 			}
+
+			// Blank remaining placeholders
+			$this->redirect = rtrim(preg_replace('/\$\d+/', '', $this->redirect), '/');
 		}
 
 		return true;
