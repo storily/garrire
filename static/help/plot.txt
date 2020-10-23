@@ -1,0 +1,3 @@
+`~plot` (alias: `~prompt`)
+**Random plots and prompts.**
+You can optionally filter by category. Currently available: `general`, `fantasy`, `sci-fi`, `crime`.
