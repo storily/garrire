@@ -1,6 +1,6 @@
 <?php
 
-/// plot (prompt) - Random plots and prompts.
+/// plot (prompt) - Get a random plot/prompt.
 ///
 /// You can optionally filter by theme. Currently available:
 /// `general`, `fantasy`, `sci-fi`, `crime`.
