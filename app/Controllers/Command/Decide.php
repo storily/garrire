@@ -1,6 +1,6 @@
 <?php
 
-/// 8ball - Ask a question, get an answer.
+/// decide (8ball) - Ask a question, get an answer.
 ///
 /// Answers are provided “as is,” without warranty of any kind, express or
 /// implied, including but not limited to the warranties of merchantibility,
@@ -15,10 +15,8 @@
 declare(strict_types=1);
 namespace Controllers\Command;
 
-class EightBall extends \Controller
+class Decide extends \Controller
 {
-  const HELP_NAME = '8ball';
-
   const ANSWERS = [
     'It is decidedly so.',
     'Without a doubt.',

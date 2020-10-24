@@ -1,5 +1,6 @@
 `~8ball`: Ask a question, get an answer.
 `~choose`: Choose between several items (separated by `or`).
+`~decide`: Ask a question, get an answer.
 `~motivate`: Motivational messages as a service.
 `~palindrome`: Find the nearest greater palindrome number.
 `~pick`: Select a number from a range, or find random items.
