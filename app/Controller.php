@@ -11,7 +11,7 @@ class Controller
 	{
 		$body = file_get_contents('php://input');
 		if (!empty($body)) {
-			$payload = json_decode($body, true);
+			$payload = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
 			if (!empty($payload['command'])) {
 				$this->command = $payload['command'][0];
 				$this->payload = $payload['message'];
@@ -81,43 +81,26 @@ class Controller
 	protected function reply(string $content, int $channel_id = null, bool $once = false): void
 	{
 		$this->send_type('application/json');
-		$act = json_encode([ 'create-message' => array_filter([
-			'content' => $content,
-			'channel_id' => $channel_id,
-		]) ]);
+		$act = new Acts\CreateMessage($content, $channel_id);
 
 		if ($once) {
 			header('content-length: ' . strlen($act));
 			echo $act;
 			$this->end();
 		} else {
-			echo $act . str_repeat(' ', 4096) . "\n";
+			$act->send();
 		}
 	}
 
 	protected function assign_role(int $role_id, int $user_id, ?int $server_id = null, ?string $reason = null): void
 	{
 		$this->send_type('application/json');
-		$act = json_encode([ 'assign-role' => array_filter([
-			'role_id' => $role_id,
-			'user_id' => $user_id,
-			'server_id' => $server_id,
-			'reason' => $reason,
-		]) ]);
-
-		echo $act . str_repeat(' ', 4096) . "\n";
+		(new Acts\AssignRole($role_id, $user_id, $server_id, $reason))->send();
 	}
 
 	protected function remove_role(int $role_id, int $user_id, ?int $server_id = null, ?string $reason = null): void
 	{
 		$this->send_type('application/json');
-		$act = json_encode([ 'remove-role' => array_filter([
-			'role_id' => $role_id,
-			'user_id' => $user_id,
-			'server_id' => $server_id,
-			'reason' => $reason,
-		]) ]);
-
-		echo $act . str_repeat(' ', 4096) . "\n";
+		(new Acts\RemoveRole($role_id, $user_id, $server_id, $reason))->send();
 	}
 }
