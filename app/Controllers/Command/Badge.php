@@ -25,10 +25,17 @@ class Badge extends \Controller
 
 		switch ($action) {
 			case 'list':
-				$this->reply(explode(', ', array_map(
-					fn ($b) => "**{$b->name}**",
-					\Models\Badge::all()
-				)));
+				$this->reply(
+					\Models\Badge::query()
+					->orderBy('name', 'asc')
+					->get()
+					->groupBy('kind')
+					->map(fn ($badges, $kind) => "{$kind}s: " . $badges
+						->map(fn ($b) => "**{$b->name}**")
+						->implode(', ')
+					)
+					->implode("\n")
+				);
 			break;
 
 			case 'get':
