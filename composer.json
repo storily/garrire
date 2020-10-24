@@ -17,6 +17,7 @@
         "illuminate/database": "^8.8.0",
         "illuminate/events": "^8.8.0",
         "illuminate/filesystem": "^8.8.0",
+        "psy/psysh": "^0.10.4",
         "symfony/var-dumper": "^5.1.0",
         "symfony/finder": "^5.1.0"
     },

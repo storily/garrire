@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+cd "$(dirname $BASH_SOURCE)/../"
+exec vendor/bin/psysh app/bootstrap.php $*
