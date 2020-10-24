@@ -16,7 +16,7 @@
 declare(strict_types=1);
 namespace Controllers\Command;
 
-class Pick extends \Controller
+class Pick extends \Controllers\Controller
 {
 	private const SPECIALS = [
 		'animal' => 'animal',

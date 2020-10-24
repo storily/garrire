@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+namespace Controllers;
 
 class Controller
 {
@@ -55,16 +56,15 @@ class Controller
 		$this->redirect("/command/help/$name");
 	}
 
-	protected function end(): void
+	protected function end(int $status = 200): void
 	{
-		throw new Exceptions\End;
+		throw new \Exceptions\End($status);
 	}
 
 	protected function redirect(string $url, int $code = 307): void
 	{
-		http_response_code($code);
 		header('location: '.$url);
-		$this->end();
+		$this->end($code);
 	}
 
 	private $type_sent = false;
@@ -74,14 +74,14 @@ class Controller
 			header("content-type: $type");
 			$this->type_sent = $type;
 		} else if ($this->type_sent != $type) {
-			throw new Exceptions\ReplyTypeMismatch($this->type_sent, $type);
+			throw new \Exceptions\ReplyTypeMismatch($this->type_sent, $type);
 		}
 	}
 
 	protected function reply(string $content, int $channel_id = null, bool $once = false): void
 	{
 		$this->send_type('application/json');
-		$act = new Acts\CreateMessage($content, $channel_id);
+		$act = new \Acts\CreateMessage($content, $channel_id);
 
 		if ($once) {
 			header('content-length: ' . strlen($act));
@@ -95,12 +95,12 @@ class Controller
 	protected function assign_role(int $role_id, int $user_id, ?int $server_id = null, ?string $reason = null): void
 	{
 		$this->send_type('application/json');
-		(new Acts\AssignRole($role_id, $user_id, $server_id, $reason))->send();
+		(new \Acts\AssignRole($role_id, $user_id, $server_id, $reason))->send();
 	}
 
 	protected function remove_role(int $role_id, int $user_id, ?int $server_id = null, ?string $reason = null): void
 	{
 		$this->send_type('application/json');
-		(new Acts\RemoveRole($role_id, $user_id, $server_id, $reason))->send();
+		(new \Acts\RemoveRole($role_id, $user_id, $server_id, $reason))->send();
 	}
 }

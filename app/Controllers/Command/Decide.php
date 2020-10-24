@@ -15,7 +15,7 @@
 declare(strict_types=1);
 namespace Controllers\Command;
 
-class Decide extends \Controller
+class Decide extends \Controllers\Controller
 {
   const ANSWERS = [
     'It is decidedly so.',

@@ -38,7 +38,7 @@ class Command extends Model
 		return true;
 	}
 
-	public function initiate(): \Controller
+	public function initiate(): \Controllers\Controller
 	{
 		if ($this->redirect) {
 			http_response_code($this->redirect_code ?? 307);
@@ -84,23 +84,15 @@ class Command extends Model
 			}
 		}
 
-		if (!$command) return http_response_code(404);
+		if (!$command) throw new \Exceptions\End(404);
 
 		try {
 			$instance = $command->initiate();
 		} catch (\Throwable $err) {
 			dump($err);
-			return http_response_code(404);
+			throw new \Exceptions\End(404);
 		}
 
-		try {
-			$instance->$method();
-		} catch (\Exceptions\End $end) {
-			return;
-		} catch (\Throwable $err) {
-			dump($err);
-			http_response_code(500);
-			echo "$err";
-		}
+		$instance->$method();
 	}
 }

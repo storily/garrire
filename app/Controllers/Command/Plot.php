@@ -8,7 +8,7 @@
 declare(strict_types=1);
 namespace Controllers\Command;
 
-class Plot extends \Controller
+class Plot extends \Controllers\Controller
 {
 	public function post(): void
 	{

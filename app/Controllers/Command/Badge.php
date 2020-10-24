@@ -11,7 +11,7 @@
 declare(strict_types=1);
 namespace Controllers\Command;
 
-class Badge extends \Controller
+class Badge extends \Controllers\Controller
 {
 	public function post(): void
 	{

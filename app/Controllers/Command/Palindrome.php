@@ -12,7 +12,7 @@
 declare(strict_types=1);
 namespace Controllers\Command;
 
-class Palindrome extends \Controller
+class Palindrome extends \Controllers\Controller
 {
   public function post(): void
   {

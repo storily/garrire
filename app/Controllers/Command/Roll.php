@@ -10,7 +10,7 @@
 declare(strict_types=1);
 namespace Controllers\Command;
 
-class Roll extends \Controller
+class Roll extends \Controllers\Controller
 {
   public function post(): void
   {
