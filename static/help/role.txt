@@ -1,5 +1,0 @@
-`~badge` (aliases: `~badges`, `~role`, `~roles`)
-**Confers or removes badges (roles) on request.**
-Two types of badges are available: locations and pronouns. Get a list with `badge list`, or look around to what people have.
-
-To get a badge, call `badge get badgename`, and to remove a badge call `badge leave badgename`.

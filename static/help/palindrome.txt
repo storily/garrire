@@ -1,3 +1,0 @@
-`~palindrome` (alias: `~pal`)
-**Find the nearest greater palindrome number.**
-A palindrome number is one where digits repeat symmetrically, like `12321` or `619916`. NZNano tradition is to attempt to finish a day's writing on a palindrome number. Tell this command your current word count and you'll see how close you are to the next one.

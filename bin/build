@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+source env.sh
+composer install
+
+mkdir -p static/help
+bin/genhelp "$COMMAND_PREFIX"

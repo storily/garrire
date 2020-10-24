@@ -1,3 +1,0 @@
-`~plot` (alias: `~prompt`)
-**Get a random plot/prompt.**
-You can optionally filter by theme. Currently available: `general`, `fantasy`, `sci-fi`, `crime`.

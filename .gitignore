@@ -1,5 +1,7 @@
 /vendor/
 /node_modules/
 
+/static/help*
+
 env.sh
 refinery.toml

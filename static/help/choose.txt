@@ -1,3 +1,0 @@
-`~choose`
-**Choose between several items (separated by `or`).**
-Separate items by the word `or`. One will be chosen at random.
