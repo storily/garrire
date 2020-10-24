@@ -9,9 +9,14 @@ class Membership extends Controller
 	{
 		dump($this->payload);
 
-		// (new \Acts\AssignRole(
-		// 	$this->payload['server_id']
-		// ))->send();
+		$role = (int) \Models\Setting::where('name', 'person-role')->first()->value;
+
+		$this->assign_role(
+			$role,
+			$this->payload['user']['id'],
+			$this->payload['server_id'],
+			'Automatic upon entry (garrīre)'
+		);
 		$this->end();
 	}
 }
