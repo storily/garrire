@@ -3,7 +3,7 @@
 def main(prefix)
 	helps = []
 
-	Dir['app/Controllers/**/*.php'].each do |file|
+	Dir['app/Controllers/Command/*.php'].each do |file|
 		puts "Processing #{file}"
 		helps << Help.extract_from_php(file, prefix)
 	end

@@ -11,6 +11,8 @@ try {
 		Models\Command::handle($method, preg_replace('|^/command|', '', $path));
 	} else if (preg_match('|^/server/\d+/join/\d+$|', $path)) {
 		(new Controllers\Membership)->join();
+	} else if ($path == '/check/double-bang') {
+		(new Controllers\Check)->double_bang();
 	} else {
 		throw new \Exceptions\End(404);
 	}

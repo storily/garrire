@@ -32,6 +32,7 @@ class Controller
 		// TODO: find instead the first pos of the first command[]
 		// and determine the prefix to be anything before, to account
 		// for multichar prefixes
+		// OR get the prefix from env/config
 		$prefix = $content[0] ?? null;
 		if (!$prefix) return null;
 
@@ -84,6 +85,7 @@ class Controller
 		$act = new \Acts\CreateMessage($content, $channel_id);
 
 		if ($once) {
+			$act = "$act";
 			header('content-length: ' . strlen($act));
 			echo $act;
 			$this->end();
