@@ -1,4 +1,4 @@
-`~8ball`: Ask a question, get an answer.
+`~badge`: Confers or removes badges (roles) on request.
 `~choose`: Choose between several items (separated by `or`).
 `~decide`: Ask a question, get an answer.
 `~motivate`: Motivational messages as a service.
