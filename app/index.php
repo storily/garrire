@@ -8,9 +8,12 @@ $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 try {
 	if (str_starts_with($path, '/command/')) {
-	Models\Command::handle($method, preg_replace('|^/command|', '', $path));
-else
-	http_response_code(404);
+		Models\Command::handle($method, preg_replace('|^/command|', '', $path));
+	} else if (preg_match('|^/server/\d+/join/\d+$|', $path)) {
+		(new Controllers\Membership)->join();
+	} else {
+		throw new \Exceptions\End(404);
+	}
 } catch (\Exceptions\End $end) {
 	if (!headers_sent()) http_response_code($end->status);
 	exit;
