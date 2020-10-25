@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source env.sh
+
+composer install
+bin/build-help
+bin/build-calc

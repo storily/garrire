@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+if [[ ! -f Cargo.toml ]]; then
+	cd calc
+fi
+
+output="$1"
+if [[ -z "$output" ]]; then
+	output="../app/Ext/calc.h"
+fi
+
+libloc="$2"
+if [[ -z "$libloc" ]]; then
+	if [[ -d "../../garriire" ]]; then
+		pushd ../../garriire/calc
+		libloc="$PWD/target/release/libcalc.so"
+		popd
+	else
+		libloc="$PWD/target/release/libcalc.so"
+	fi
+fi
+
+set -u
+
+rm -rf target
+cargo build --release
+sed -i \
+	-e '/^#include/d' \
+	-e '/^extern "C"/d' \
+	-e '/^\} \/\/ extern "C"/d' \
+	calc.h
+
+{ cat <<FFI
+#define FFI_SCOPE "CALC"
+#define FFI_LIB "$libloc"
+FFI
+grep -v '^$' calc.h ; } > "$output"

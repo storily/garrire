@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+mkdir -p static/help
+bin/genhelp "${COMMAND_PREFIX:-!}"

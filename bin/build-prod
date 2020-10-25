@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+version="$(jq .version -r package.json)"
+declare -a images
+
+for f in prod/Dockerfile.*; do
+	component="${f/prod\/Dockerfile./}"
+	image="registry.nut/garrire:$component-$version"
+	images+=($image)
+	docker build -t "$image" -f "$f" .
+done
+
+for i in "${images[@]}"; do
+	echo "push $i"
+	docker push "$i"
+done
