@@ -26,6 +26,8 @@ COPY bin /webroot/bin
 COPY composer.json composer.lock /webroot/
 COPY --from=calc /build/calc.h /build/calc/target/release/libcalc.so /webroot/app/Ext/
 
+ENV PHP_ENV production
+
 RUN composer install
 RUN rm -r /etc/php7/* \
 	&& addgroup -Sg 1300 www-data \

@@ -1,0 +1,167 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sassbot-php
+  labels:
+    app: sassbot
+    component: php
+spec:
+  replicas: 2
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: sassbot
+      component: php
+  template:
+    metadata:
+      labels:
+        app: sassbot
+        component: php
+    spec:
+      containers:
+      - name: fpm
+        image: registry.nut/garrire:php-0.0.0
+        env:
+        - name: PHP_ENV
+          value: production
+        - name: COMMAND_PREFIX
+          value: "!"
+        - name: DATABASE_HOST
+          value: 10.0.128.1
+        - name: DATABASE_NAME
+          value: sassbot
+        - name: DATABASE_USER
+          value: sassbot
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sassbot
+              key: db_password
+        ports:
+        - name: fpm
+          containerPort: 9000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sassbot-php
+spec:
+  selector:
+    app: sassbot
+    component: php
+  type: LoadBalancer
+  loadBalancerIP: 10.0.128.64
+  ports:
+  - name: fpm
+    protocol: TCP
+    port: 9000
+    targetPort: fpm
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sassbot-router
+  labels:
+    app: sassbot
+    component: router
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: sassbot
+      component: router
+  template:
+    metadata:
+      labels:
+        app: sassbot
+        component: router
+    spec:
+      containers:
+      - name: router
+        image: registry.nut/garrire:router-0.0.0
+        ports:
+        - name: http
+          containerPort: 8265
+        - name: status
+          containerPort: 81
+        startupProbe:
+          httpGet:
+            path: /nginx_status
+            port: status
+          initialDelaySeconds: 5
+          periodSeconds: 2
+          failureThreshold: 30
+        livenessProbe:
+          httpGet:
+            path: /nginx_status
+            port: status
+          initialDelaySeconds: 10
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sassbot-router
+spec:
+  selector:
+    app: sassbot
+    component: router
+  type: LoadBalancer
+  loadBalancerIP: 10.0.128.65
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8265
+    targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sassbot-accord
+  labels:
+    app: sassbot
+    component: accord
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: sassbot
+      component: accord
+  template:
+    metadata:
+      labels:
+        app: sassbot
+        component: accord
+    spec:
+      containers:
+      - name: accord
+        image: registry.nut/garrire:accord-0.0.0
+        env:
+        - name: DISCORD_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: sassbot
+              key: discord_token
+        - name: ACCORD_TARGET
+          value: http://10.0.128.65:8265
+        - name: ACCORD_BIND
+          value: 0.0.0.0:8266
+        - name: ACCORD_COMMAND_MATCH
+          value: ^![\w=!]+
+        - name: ACCORD_COMMAND_PARSE
+          value: ^!([\w=!]+)(?:\s+(\w+))?

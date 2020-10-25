@@ -18,6 +18,10 @@ indent_style = space
 indent_style = space
 indent_size = 2
 
+[*.yml]
+indent_style = space
+indent_size = 2
+
 [*.md]
 indent_style = space
 indent_size = 3
