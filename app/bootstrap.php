@@ -17,18 +17,21 @@ use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 use Symfony\Component\VarDumper\Dumper\ServerDumper;
 use Symfony\Component\VarDumper\VarDumper;
 
-$env_sh = "env -i bash -c 'cd ".ROOT." && source env.sh && env'";
-foreach (array_filter(
-	array_map(
-		fn ($line) => array_filter(explode('=', $line, 2)),
-		explode("\n", `$env_sh`)
-	),
-	fn ($pair) => !!$pair && !in_array($pair[0], ['_', 'PWD', 'SHLVL'])
-) as $envpair) $_ENV[$envpair[0]] = $envpair[1];
-
-define('ENVIRONMENT', $_ENV['PHP_ENV']);
 const DEVELOPMENT = 'development';
 const PRODUCTION = 'production';
+
+if (($_ENV['PHP_ENV'] ?? null) !== PRODUCTION) {
+	$env_sh = "env -i bash -c 'cd ".ROOT." && source env.sh && env'";
+	foreach (array_filter(
+		array_map(
+			fn ($line) => array_filter(explode('=', $line, 2)),
+			explode("\n", `$env_sh`)
+		),
+		fn ($pair) => !!$pair && !in_array($pair[0], ['_', 'PWD', 'SHLVL'])
+	) as $envpair) $_ENV[$envpair[0]] = $envpair[1];
+
+	define('ENVIRONMENT', $_ENV['PHP_ENV']);
+}
 
 $capsule = new Capsule;
 $capsule->addConnection([
