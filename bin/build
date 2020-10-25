@@ -1,7 +1,28 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 source env.sh
 composer install
 
 mkdir -p static/help
 bin/genhelp "$COMMAND_PREFIX"
+
+cd calc
+cargo build --release
+sed -i \
+	-e '/^#include/d' \
+	-e '/^extern "C"/d' \
+	-e '/^\} \/\/ extern "C"/d' \
+	calc.h
+cd ..
+
+if [[ -d "../garriire" ]]; then
+	cd ../garriire
+fi
+
+{ cat <<FFI
+#define FFI_SCOPE "CALC"
+#define FFI_LIB "$PWD/calc/target/release/libcalc.so"
+FFI
+grep -v '^$' calc/calc.h ; } > app/Ext/calc.h

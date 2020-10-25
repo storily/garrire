@@ -11,6 +11,13 @@ insert_final_newline = true
 [*.json]
 indent_style = space
 
+[*.rs]
+indent_style = space
+
+[*.toml]
+indent_style = space
+indent_size = 2
+
 [*.md]
 indent_style = space
 indent_size = 3

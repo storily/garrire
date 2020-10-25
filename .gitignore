@@ -2,6 +2,8 @@
 /node_modules/
 
 /static/help*
+target/
 
 env.sh
 refinery.toml
+calc.h
