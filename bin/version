@@ -3,8 +3,8 @@
 set -euo pipefail
 
 app="garrire"
-mainbranch="main"
-upstreamrx="/passcod/$app"
+mainbranch="accord"
+upstreamrx="storily"
 
 curbranch=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$curbranch" != "$mainbranch" ]]; then
@@ -26,7 +26,7 @@ git pull --rebase --autostash "$upstream" "$mainbranch"
 echo "Fetching tags from upstream"
 git fetch --tags "$upstream"
 
-gitver=$(git describe --tags $(git rev-list --tags --max-count=1))
+gitver=$(git describe --tags $(git rev-list --tags --max-count=1) || echo v0.0.0)
 echo "Last tag from git: $gitver"
 
 npmver=$(jq '.version' -r package.json)
@@ -44,7 +44,14 @@ fi
 nextver="$nextyear.$(date +%-m).$nextbuild"
 echo "Next version to be $nextver, creating..."
 
-npm version "$nextver"
+echo "Amending deploy and package"
+sed -E -i "s|(image: registry.nut/garrire:[a-z]+)-[0-9.]+|\1-$nextver|" prod/kdeploy.yml
+sed -E -i "s|(\"version\":\s+\")[0-9.]+|\1$nextver|" package.json
+
+echo "Tagging version"
+git add .
+git commit -am "v$nextver"
+git tag -am {,}"v$nextver"
 
 echo "Pushing to upstream"
 git push --follow-tags "$upstream" "$mainbranch"
