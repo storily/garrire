@@ -26,6 +26,7 @@ spec:
       containers:
       - name: fpm
         image: registry.nut/garrire:php-0.0.0
+        imagePullPolicy: Always
         env:
         - name: PHP_ENV
           value: production
@@ -41,7 +42,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: sassbot
-              key: db_password
+              key: db-password
         ports:
         - name: fpm
           containerPort: 9000
@@ -89,6 +90,7 @@ spec:
       containers:
       - name: router
         image: registry.nut/garrire:router-0.0.0
+        imagePullPolicy: Always
         ports:
         - name: http
           containerPort: 8265
@@ -151,12 +153,13 @@ spec:
       containers:
       - name: accord
         image: registry.nut/garrire:accord-0.0.0
+        imagePullPolicy: Always
         env:
         - name: DISCORD_TOKEN
           valueFrom:
             secretKeyRef:
               name: sassbot
-              key: discord_token
+              key: discord-token
         - name: ACCORD_TARGET
           value: http://10.0.128.65:8265
         - name: ACCORD_BIND
