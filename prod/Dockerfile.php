@@ -13,24 +13,28 @@ RUN RUSTFLAGS="-C target-feature=-crt-static" \
 FROM php:7.4-fpm-alpine
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
-RUN apk add icu icu-dev libcurl curl-dev
+RUN apk add \
+	curl-dev \
+	icu \
+	icu-dev \
+	libcurl \
+	libxslt \
+	libxslt-dev \
+	sqlite \
+	sqlite-dev
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY prod/php.ini "$PHP_INI_DIR/conf.d/zzz-sassbot.ini"
 COPY prod/php-fpm.conf /usr/local/etc/php-fpm.d/sassbot.conf
 
+RUN docker-php-ext-enable opcache sodium
 RUN docker-php-ext-install \
 	ctype \
 	curl \
 	iconv \
 	intl \
 	pdo_mysql \
-	pdo_sqlite
-
-RUN docker-php-ext-enable \
-	opcache \
-	sodium \
-	tidy \
+	pdo_sqlite \
 	xsl
 
 WORKDIR /webroot
