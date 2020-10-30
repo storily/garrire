@@ -20,5 +20,6 @@ COPY app /webroot/app
 COPY prod/nginx.conf /etc/nginx/nginx.conf
 COPY nginx.conf /etc/nginx/garrire.conf
 
-ENTRYPOINT ["sh", "-c"]
-CMD ["exec nginx"]
+RUN apk add jq bash && touch /access.log.json /error.log
+ENTRYPOINT ["bash", "-c"]
+CMD ["trap 'echo Errored; exit 2' ERR; trap 'echo Killed; exit 1' TERM INT; nginx & tail -f /access.log.json /error.log"]
