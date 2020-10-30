@@ -1,7 +1,7 @@
 CREATE TABLE `pick_colours` (
 	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`text` TEXT NOT NULL,
+	`text` VARCHAR(255) NOT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `text uniq` (`text`)
 );
