@@ -10,28 +10,36 @@ RUN RUSTFLAGS="-C target-feature=-crt-static" \
 	bin/build-calc "/build/calc.h" "/webroot/app/Ext/libcalc.so"
 
 
-FROM alpine
+FROM php:7.4-fpm-alpine
 
-RUN apk add \
-	composer \
-	php \
-	php-ctype \
-	php-fpm \
-	php-intl \
-	php-tokenizer
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+RUN apk add icu icu-dev libcurl curl-dev
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY prod/php.ini "$PHP_INI_DIR/conf.d/zzz-sassbot.ini"
+COPY prod/php-fpm.conf /usr/local/etc/php-fpm.d/sassbot.conf
+
+RUN docker-php-ext-install \
+	ctype \
+	curl \
+	iconv \
+	intl \
+	pdo_mysql \
+	pdo_sqlite
+
+RUN docker-php-ext-enable \
+	opcache \
+	sodium \
+	tidy \
+	xsl
 
 WORKDIR /webroot
+ENV PHP_ENV production
+ENV APP_DEBUG false
+
 COPY app /webroot/app
 COPY bin /webroot/bin
 COPY composer.json composer.lock /webroot/
 COPY --from=calc /build/calc.h /build/calc/target/release/libcalc.so /webroot/app/Ext/
 
-ENV PHP_ENV production
-
 RUN composer install
-RUN rm -r /etc/php7/* \
-	&& addgroup -Sg 1300 www-data \
-	&& adduser -SDHG www-data -u 1300 www-data
-COPY prod/php.ini prod/php-fpm.conf /etc/php7/
-
-CMD ["php-fpm7"]
