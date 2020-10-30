@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+app="garrire"
+mainbranch="main"
+upstreamrx="/passcod/$app"
+
+curbranch=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$curbranch" != "$mainbranch" ]]; then
+	echo "Current branch is not $mainbranch, abort!"
+	exit 1
+fi
+
+gitstatus=$(git status --untracked-files=no --porcelain)
+if [[ ! -z "$gitstatus" ]]; then
+	echo "Uncommited files and changes, abort!"
+	exit 2
+fi
+
+upstream=$(git remote -v | grep -i "$upstreamrx" -m1 | awk '{print $1}')
+echo "Upstream remote discovered as: $upstream"
+
+git pull --rebase --autostash "$upstream" "$mainbranch"
+
+echo "Fetching tags from upstream"
+git fetch --tags "$upstream"
+
+gitver=$(git describe --tags $(git rev-list --tags --max-count=1))
+echo "Last tag from git: $gitver"
+
+npmver=$(jq '.version' -r package.json)
+echo "(Version from package.json: $npmver)"
+
+curbuild=$(cut -d. -f3 <<< "$npmver")
+nextbuild=$(expr "$curbuild" + 1)
+
+curyear=$(cut -d. -f1 <<< "$npmver")
+nextyear=$(date +%Y)
+if [[ "$curyear" != "$nextyear" ]]; then
+	nextbuild="1"
+fi
+
+nextver="$nextyear.$(date +%-m).$nextbuild"
+echo "Next version to be $nextver, creating..."
+
+npm version "$nextver"
+
+echo "Pushing to upstream"
+git push --follow-tags "$upstream" "$mainbranch"
+
+notify-send -t 5000 "$app version $nextver has been pushed!"
