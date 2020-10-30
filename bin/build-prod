@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+filter="$1"
+
 set -euo pipefail
 
 version="$(jq .version -r package.json)"
@@ -7,6 +9,10 @@ declare -a images
 
 for f in prod/Dockerfile.*; do
 	component="${f/prod\/Dockerfile./}"
+	if [[ ! -z "$filter" ]] && grep -v "$filter" <<<"$component" >/dev/null; then
+		continue
+	fi
+
 	image="registry.nut/garrire:$component-$version"
 	images+=($image)
 	docker build -t "$image" -f "$f" .

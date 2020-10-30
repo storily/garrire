@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+bin/build-prod "$1"
+kubectl rollout restart "deployment/sassbot-$1"
