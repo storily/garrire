@@ -5,7 +5,7 @@
 declare(strict_types=1);
 namespace Controllers\Command;
 
-class Motivation extends \Controllers\Controller
+class Motivate extends \Controllers\Controller
 {
 	public function post(): void
 	{
