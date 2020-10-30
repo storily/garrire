@@ -3,10 +3,10 @@
 declare(strict_types=1);
 require_once('bootstrap.php');
 
-$method = strtolower($_SERVER['REQUEST_METHOD']);
-$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
 try {
+	$method = strtolower($_SERVER['REQUEST_METHOD']);
+	$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
 	if (str_starts_with($path, '/command/')) {
 		Models\Command::handle($method, preg_replace('|^/command|', '', $path));
 	} else if (preg_match('|^/server/\d+/join/\d+$|', $path)) {
@@ -20,7 +20,7 @@ try {
 	if (!headers_sent()) http_response_code($end->status);
 	exit;
 } catch (\Throwable $err) {
-	dump($err);
 	http_response_code(500);
-	die("$err");
+	if (ENVIRONMENT === PRODUCTION) error_log($err->getMessage().' '.$err->getTraceAsString());
+	else dump($err);
 }
