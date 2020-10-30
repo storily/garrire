@@ -21,6 +21,6 @@ try {
 	exit;
 } catch (\Throwable $err) {
 	http_response_code(500);
-	if (ENVIRONMENT === PRODUCTION) error_log($err->getMessage().' '.$err->getTraceAsString());
+	if (ENVIRONMENT == PRODUCTION) error_log($err->getMessage().' '.$err->getTraceAsString());
 	else dump($err);
 }

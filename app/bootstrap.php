@@ -14,11 +14,12 @@ try {
 use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Events\Dispatcher;
+use Symfony\Component\VarDumper\Cloner\Data;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
 use Symfony\Component\VarDumper\Dumper\ContextProvider\CliContextProvider;
 use Symfony\Component\VarDumper\Dumper\ContextProvider\SourceContextProvider;
-use Symfony\Component\VarDumper\Dumper\HtmlDumper;
+use Symfony\Component\VarDumper\Dumper\DataDumperInterface;
 use Symfony\Component\VarDumper\Dumper\ServerDumper;
 use Symfony\Component\VarDumper\VarDumper;
 
@@ -48,16 +49,34 @@ try {
 		'password'  => ($pf = $_ENV['DATABASE_PASSWORD_FILE'] ?? null) ? trim(file_get_contents($pf)) : $_ENV['DATABASE_PASSWORD'],
 	]);
 
-	if (ENVIRONMENT == DEVELOPMENT) {
-		$cloner = new VarCloner;
-		$fallbackDumper = in_array(PHP_SAPI, ['cli', 'phpdbg']) ? new CliDumper : new HtmlDumper;
-		$dumper = new ServerDumper('tcp://127.0.0.1:9912', $fallbackDumper, [
-			'cli' => new CliContextProvider,
-			'source' => new SourceContextProvider,
-		]);
+	if (in_array(PHP_SAPI, ['cli', 'phpdbg'])) {
+		$fallbackDumper = new CliDumper;
+	} else {
+		class LogDumper implements DataDumperInterface {
+			public function dump(Data $data)
+			{
+				$data = $data->getValue();
 
-		VarDumper::setHandler(fn ($var) => $dumper->dump($cloner->cloneVar($var)));
+				try {
+					$str = $data->__toString();
+				} catch (\Throwable $_) {
+					$str = var_export($data, true);
+				}
+
+				error_log(substr(preg_replace('/\s+/', ' ', $str), 0, 1024));
+			}
+		}
+
+		$fallbackDumper = new LogDumper;
 	}
+
+	$dumper = new ServerDumper('tcp://127.0.0.1:9912', $fallbackDumper, [
+		'cli' => new CliContextProvider,
+		'source' => new SourceContextProvider,
+	]);
+
+	$cloner = new VarCloner;
+	VarDumper::setHandler(fn ($var) => $dumper->dump($cloner->cloneVar($var)));
 
 	$capsule->setEventDispatcher(new Dispatcher(new Container));
 	$capsule->setAsGlobal();

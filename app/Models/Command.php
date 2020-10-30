@@ -89,7 +89,8 @@ class Command extends Model
 		try {
 			$instance = $command->initiate();
 		} catch (\Throwable $err) {
-			dump($err);
+			if (ENVIRONMENT == PRODUCTION) error_log($err->getMessage().' '.$err->getTraceAsString());
+			else dump($err);
 			throw new \Exceptions\End(404);
 		}
 
