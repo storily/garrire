@@ -3,7 +3,7 @@
 set -euo pipefail
 
 app="garrire"
-mainbranch="accord"
+mainbranch="main"
 upstreamrx="storily"
 
 curbranch=$(git rev-parse --abbrev-ref HEAD)
