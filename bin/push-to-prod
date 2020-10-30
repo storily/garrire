@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
+set -eo pipefail
+
 bin/build-prod "$1"
 kubectl rollout restart "deployment/sassbot-$1"

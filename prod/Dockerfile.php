@@ -18,6 +18,8 @@ RUN apk add \
 	icu \
 	icu-dev \
 	libcurl \
+	libffi \
+	libffi-dev \
 	libxslt \
 	libxslt-dev \
 	sqlite \
@@ -31,6 +33,7 @@ RUN docker-php-ext-enable opcache sodium
 RUN docker-php-ext-install \
 	ctype \
 	curl \
+	ffi \
 	iconv \
 	intl \
 	pdo_mysql \
