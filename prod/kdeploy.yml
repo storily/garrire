@@ -30,6 +30,8 @@ spec:
         env:
         - name: PHP_ENV
           value: production
+        - name: APP_DEBUG
+          value: 'false'
         - name: COMMAND_PREFIX
           value: "!"
         - name: DATABASE_HOST
