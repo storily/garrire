@@ -22,7 +22,7 @@ class Calc extends \Controllers\Controller
 		} catch (\Exceptions\ExtCalc $err) {
 			$out = $err->getMessage();
 		} catch (\Throwable $err) {
-			$out = 'unexpected error';
+			$out = "unexpected error: $err";
 		}
 
 		$this->reply($out, null, true);
