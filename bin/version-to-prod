@@ -4,8 +4,4 @@ set -euo pipefail
 
 bin/version
 bin/build-prod
-
-for f in prod/Dockerfile.*; do
-	component="${f/prod\/Dockerfile./}"
-	kubectl rollout restart "deployment/sassbot-$component"
-done
+kubectl apply --record -f prod/kdeploy.yml
