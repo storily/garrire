@@ -27,6 +27,11 @@ class WordCount extends \Controllers\Controller
 		}
 
 		$novel = \Models\Novel::where('discord_user_id', $userid)->first();
+		if (!$novel) {
+			$this->show_help();
+			return;
+		}
+
 		$title = $novel->title();
 		$count = $novel->wordcount();
 
