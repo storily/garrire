@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - name: fpm
-        image: registry.nut/garrire:php-2020.10.3
+        image: registry.nut/garrire:php-2020.10.4
         imagePullPolicy: Always
         env:
         - name: PHP_ENV
@@ -91,7 +91,7 @@ spec:
     spec:
       containers:
       - name: router
-        image: registry.nut/garrire:router-2020.10.3
+        image: registry.nut/garrire:router-2020.10.4
         imagePullPolicy: Always
         ports:
         - name: http
@@ -154,7 +154,7 @@ spec:
     spec:
       containers:
       - name: accord
-        image: registry.nut/garrire:accord-2020.10.3
+        image: registry.nut/garrire:accord-2020.10.4
         imagePullPolicy: Always
         env:
         - name: DISCORD_TOKEN
