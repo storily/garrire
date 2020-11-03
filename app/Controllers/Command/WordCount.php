@@ -34,7 +34,44 @@ class WordCount extends \Controllers\Controller
 
 		$title = $novel->title();
 		$count = $novel->wordcount();
+		$goal = $novel->goal();
+		$progress = $novel->progress();
 
-		$this->reply("“{$title}”: **{$count}** words", null, true);
+
+		$deets = implode(', ', array_filter([
+			round($progress->percent, 2) . '% done',
+			static::on_track($progress->today->diff ?? null, ' today'),
+			static::on_track($progress->live->diff ?? null, ' live'),
+			($goal == $novel->default_goal() ? null : (static::numberk($goal).' goal')),
+		]));
+
+		$this->reply("“{$title}”: **{$count}** words ($deets)", null, true);
+	}
+
+	private static function numberk(int $count): string
+	{
+		if ($count < 1000) {
+			return "{$count}";
+		} else if ($count < 10000) {
+			return round($count / 1000, 1).'k';
+		} else {
+			return round($count / 1000).'k';
+		}
+	}
+
+	private static function on_track(?int $diff, string $append = ''): ?string
+	{
+		if (is_null($diff)) return null;
+
+		if ($diff == 0) {
+			return 'on track';
+		} else if ($diff < 0) {
+			$diff = abs($diff);
+			$state = 'behind';
+		} else {
+			$state = 'ahead';
+		}
+
+		return static::numberk($diff) . " {$state}{$append}";
 	}
 }
