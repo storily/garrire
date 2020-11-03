@@ -75,8 +75,6 @@ class Novel extends Model
 		$day_secs = 60*60*24;
 		$goal_live = (int) round($goal_today - $per_day * (($day_secs - $secs) / $day_secs));
 
-		dump([$period->today->format(\DateTime::RFC3339), $secs, $day_secs, $per_day, $goal_today]);
-
 		return (object) [
 			'percent' => 100 * $count / $goal,
 			'today' => (object) [
