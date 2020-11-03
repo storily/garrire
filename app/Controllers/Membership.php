@@ -9,7 +9,7 @@ class Membership extends Controller
 	{
 		dump($this->payload);
 
-		$role = (int) \Models\Setting::where('name', 'person-role')->first()->value;
+		$role = (int) \Models\NanowrimoSetting::where('name', 'person-role')->first()->value;
 
 		$this->assign_role(
 			$role,
