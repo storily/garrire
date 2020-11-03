@@ -37,15 +37,18 @@ class WordCount extends \Controllers\Controller
 		$goal = $novel->goal();
 		$progress = $novel->progress();
 
+		$is_pal = Palindrome::is_pal($count);
+		$paldeco = $is_pal ? '✨' : '';
 
 		$deets = implode(', ', array_filter([
 			round($progress->percent, 2) . '% done',
 			static::on_track($progress->today->diff ?? null, ' today'),
 			static::on_track($progress->live->diff ?? null, ' live'),
 			($goal == $novel->default_goal() ? null : (static::numberk($goal).' goal')),
+			($is_pal ? null : ((Palindrome::next($count) - $count) . ' to next pal')),
 		]));
 
-		$this->reply("“{$title}”: **{$count}** words ($deets)", null, true);
+		$this->reply("“{$title}”: **{$paldeco}{$count}{$paldeco}** words ($deets)", null, true);
 	}
 
 	private static function numberk(int $count): string
