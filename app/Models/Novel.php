@@ -16,7 +16,6 @@ class Novel extends Model
 
 		$client = NanowrimoSetting::get_client();
 		$res = $client->get("/projects/{$this->novel}");
-		if (($code = $res->getStatusCode()) > 299) throw new \Exception("project status call failed with status $code");
 
 		$data = json_decode($res->getBody()->getContents(), true);
 		$data = $data['data']['attributes'] ?? null;
