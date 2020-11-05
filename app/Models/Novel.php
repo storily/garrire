@@ -15,13 +15,21 @@ class Novel extends Model
 		if ($this->_project_data && !$reload) return $this->_project_data;
 
 		$client = NanowrimoSetting::get_client();
-		$res = $client->get("/projects/{$this->novel}");
+		$res = $client->get("/projects/{$this->novel}?include=challenges");
 
 		$data = json_decode($res->getBody()->getContents(), true);
-		$data = $data['data']['attributes'] ?? null;
-		if (!is_array($data)) throw new \Exception('invalid data returned from project');
+		$project = $data['data']['attributes'] ?? null;
+		if (!is_array($project)) throw new \Exception('invalid data returned from project');
 
-		return $this->_project_data = $data;
+		$project['goals'] = array_map(
+			fn ($goal) => $goal['attributes'],
+			array_filter(
+				$data['included'] ?? [],
+				fn ($item) => ($item['type'] ?? null) == 'challenges'
+			)
+		);
+
+		return $this->_project_data = $project;
 	}
 
 	public function title(): string
@@ -51,14 +59,29 @@ class Novel extends Model
 		return (object) compact('start', 'finish', 'now', 'today', 'length', 'gone', 'left', 'over');
 	}
 
+	public function current_goals(): array
+	{
+		return array_filter($this->project_data()['goals'], function ($goal) {
+			if (empty($goal['starts-at']) || empty($goal['ends-at'])) return true;
+
+			$start = new \DateTime($goal['starts-at']);
+			$end = new \DateTime($goal['ends-at']);
+			$now = new \DateTime;
+
+			return ($now >= $start && $now <= $end);
+		});
+	}
+
 	public function goal(): int
 	{
-		return 50000;
+		return $this->goal_override ?? $this->default_goal();
 	}
 
 	public function default_goal(): int
 	{
-		return 50000;
+		$goals = array_map(fn ($goal) => $goal['default-goal'], $this->current_goals());
+		rsort($goals);
+		return $goals[0] ?? 50000;
 	}
 
 	public function progress(): object
