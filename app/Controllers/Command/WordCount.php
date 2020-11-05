@@ -6,12 +6,17 @@
 /// your nanowrimo pages and open the main page for your project,
 /// the URL will look like `https://nanowrimo.org/participants/your-name/projects/some-name`.
 /// Your project ID is the `some-name` part. Copy just that and tell
-/// me about it with `!wc some-name`.
+/// me about it with `!wc set novel some-name`.
 ///
-/// Thereafter, get your wordcount with `!wc`.
+/// Thereafter, get your wordcount and stats with `!wc`.
+///
+/// During november, your goal is not editable on the site. You can
+/// override it here to get correct stats with `!wc set goal WORDS`.
 
 declare(strict_types=1);
 namespace Controllers\Command;
+
+use Models\Novel;
 
 class WordCount extends \Controllers\Controller
 {
@@ -23,14 +28,48 @@ class WordCount extends \Controllers\Controller
 		if (!$userid) throw new \Exception('no user id, cannot proceed?!');
 
 		if (!empty($arg = $this->argument())) {
-			\Models\Novel::updateOrCreate(['discord_user_id' => $userid], ['novel' => $arg]);
+			$args = preg_split('/\s+/', $arg);
+			switch (trim("{$args[0]} {$args[1]}")) {
+			case '':
+				break;
+
+			case 'set goal':
+				$novel = Novel::where('discord_user_id', $userid)->first();
+				if (!$novel) {
+					$this->reply('🛑 no novel set', null, true);
+					return;
+				}
+
+				$goal = (int) str_replace('k', '000', $args[2] ?? '');
+
+				if ($goal) {
+					$novel->goal_override = $goal;
+					$novel->save();
+				} else {
+					$this->reply('that doesn’t look like a number to me', null, true);
+					return;
+				}
+				break;
+
+			case 'unset goal':
+				$novel = Novel::where('discord_user_id', $userid)->first();
+				if (!$novel) {
+					$this->reply('🛑 no novel set', null, true);
+					return;
+				}
+
+				$novel->goal_override = null;
+				$novel->save();
+				break;
+
+			case 'set novel':
+			default:
+				Novel::updateOrCreate(['discord_user_id' => $userid], ['novel' => $args[2] ?? $args[0]]);
+			}
 		}
 
-		$novel = \Models\Novel::where('discord_user_id', $userid)->first();
-		if (!$novel) {
-			$this->show_help();
-			return;
-		}
+		$novel = Novel::where('discord_user_id', $userid)->first();
+		if (!$novel) $this->show_help();
 
 		try {
 			$title = $novel->title();
