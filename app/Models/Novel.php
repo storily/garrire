@@ -15,7 +15,7 @@ class Novel extends Model
 		if ($this->_project_data && !$reload) return $this->_project_data;
 
 		$client = NanowrimoSetting::get_client();
-		$res = $client->get("/projects/{$this->novel}?include=challenges");
+		$res = $client->get("/projects/{$this->novel}?include=project-challenges");
 
 		$data = json_decode($res->getBody()->getContents(), true);
 		$project = $data['data']['attributes'] ?? null;
@@ -25,7 +25,7 @@ class Novel extends Model
 			fn ($goal) => $goal['attributes'],
 			array_filter(
 				$data['included'] ?? [],
-				fn ($item) => ($item['type'] ?? null) == 'challenges'
+				fn ($item) => ($item['type'] ?? null) == 'project-challenges'
 			)
 		);
 
@@ -39,7 +39,7 @@ class Novel extends Model
 
 	public function wordcount(): int
 	{
-		return $this->project_data()['unit-count'] ?? 0;
+		return ($this->project_data()['unit-count'] ?? 0) - $this->accounted_words();
 	}
 
 	public function period(): object
@@ -61,15 +61,21 @@ class Novel extends Model
 
 	public function current_goals(): array
 	{
-		return array_filter($this->project_data()['goals'], function ($goal) {
-			if (empty($goal['starts-at']) || empty($goal['ends-at'])) return true;
+		return array_filter(
+			$this->project_data()['goals'],
+			fn ($goal) => static::goal_is_current($goal)
+		);
+	}
 
-			$start = new \DateTime($goal['starts-at']);
-			$end = new \DateTime($goal['ends-at']);
-			$now = new \DateTime;
+	private static function goal_is_current($goal): bool
+	{
+		if (empty($goal['starts-at']) || empty($goal['ends-at'])) return true;
 
-			return ($now >= $start && $now <= $end);
-		});
+		$start = new \DateTime($goal['starts-at']);
+		$end = new \DateTime($goal['ends-at']);
+		$now = new \DateTime;
+
+		return ($now >= $start && $now <= $end);
 	}
 
 	public function goal(): int
@@ -79,9 +85,23 @@ class Novel extends Model
 
 	public function default_goal(): int
 	{
-		$goals = array_map(fn ($goal) => $goal['default-goal'], $this->current_goals());
+		$goals = array_map(fn ($goal) => $goal['goal'], $this->current_goals());
 		rsort($goals);
 		return $goals[0] ?? 50000;
+	}
+
+	// words already accounted for in past goals
+	public function accounted_words(): int
+	{
+		$past_goals = array_filter(
+			$this->project_data()['goals'],
+			fn ($goal) => !static::goal_is_current($goal)
+		);
+
+		return array_sum(array_map(
+			fn ($goal) => $goal['current-count'],
+			$past_goals
+		));
 	}
 
 	public function progress(): object
