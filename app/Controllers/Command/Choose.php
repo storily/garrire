@@ -15,7 +15,7 @@ class Choose extends \Controllers\Controller
     if (empty($arg = $this->argument())) $this->show_help();
 
     $items = array_map(
-      fn ($item) => strtolower(trim($item)),
+      fn ($item) => trim($item),
       preg_split('/\s+or\s+/i', $arg)
     );
 
