@@ -19,11 +19,11 @@ class Choose extends \Controllers\Controller
       preg_split('/\s+or\s+/i', $arg)
     );
 
+	if (in_array('write', $items)) $items[] = 'write';
+
 	if (count($items) == 1) {
 		$this->reply((rand(0, 1) ? '' : 'not ') . $items[0], null, true);
 	} else {
-		if (in_array('write', $items)) $items[] = 'write';
-
 	    $this->reply($items[array_rand($items)], null, true);
 	}
   }
