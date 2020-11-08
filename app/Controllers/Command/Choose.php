@@ -15,13 +15,15 @@ class Choose extends \Controllers\Controller
     if (empty($arg = $this->argument())) $this->show_help();
 
     $items = array_map(
-      fn ($item) => trim($item),
+      fn ($item) => strtolower(trim($item)),
       preg_split('/\s+or\s+/i', $arg)
     );
 
 	if (count($items) == 1) {
 		$this->reply((rand(0, 1) ? '' : 'not ') . $items[0], null, true);
 	} else {
+		if (in_array('write', $items)) $items[] = 'write';
+
 	    $this->reply($items[array_rand($items)], null, true);
 	}
   }
