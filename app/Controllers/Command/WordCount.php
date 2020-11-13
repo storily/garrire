@@ -194,9 +194,9 @@ class WordCount extends \Controllers\Controller
 	{
 		// probably impossible to hit, so surely someone will in a few years
 		return $count == (
-			(new DateTime)->getTimestamp() -
-			(new DateTime('today'))
-				->setTimezone(new DateTimeZone('Pacific/Auckland'))
+			(new \DateTime)->getTimestamp() -
+			(new \DateTime('today'))
+				->setTimezone(new \DateTimeZone('Pacific/Auckland'))
 				->getTimestamp()
 		);
 	}
