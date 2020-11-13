@@ -82,6 +82,8 @@ class WordCount extends \Controllers\Controller
 			else if (preg_match('/^\d0+$/', "$count")) $deco = '💫';
 			else if (static::is_incrnum($count) || static::is_decrnum($count)) $deco = '🌌';
 			else if (round(log($count, 2)) == log($count, 2)) $deco = '🤖';
+			else if (static::is_prime($count)) $deco = '🥇';
+			else if (static::is_fibonacci($count)) $deco = '🤌';
 
 			$deets = implode(', ', array_filter([
 				round($progress->percent, 2) . '% done',
@@ -144,5 +146,25 @@ class WordCount extends \Controllers\Controller
 		}
 
 		return true;
+	}
+
+	private static function is_prime(int $count): bool
+	{
+        $intsqrt = floor(sqrt($count));
+        for ($i = 2; $i <= $intsqrt; $i += 1)
+			if ($num % $i == 0) return false;
+
+		return true;
+	}
+
+	private static function is_square(int $n): bool
+	{
+		return pow(floor(sqrt($n)), 2) == $n;
+	}
+
+	private static function is_fibonacci(int $count): bool
+	{
+		# https://en.wikipedia.org/wiki/Fibonacci_number#Identification
+		return static::is_square(5 * $count + 4) || static::is_square(5 * $count - 4);
 	}
 }
