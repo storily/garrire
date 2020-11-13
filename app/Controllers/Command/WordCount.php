@@ -87,6 +87,7 @@ class WordCount extends \Controllers\Controller
 			if (static::is_weird($count)) $deco .= '👾';
 			if (static::is_square($count)) $deco .= '🆒';
 			if (static::is_perfect($count)) $deco .= '💯';
+			if (static::is_now($count)) $deco .= '🕓';
 
 			$deets = implode(', ', array_filter([
 				round($progress->percent, 2) . '% done',
@@ -186,6 +187,17 @@ class WordCount extends \Controllers\Controller
 			 13510,13790,13930,14770,15610,15890,16030,16310,
 			 16730,16870,17272,17570,17990,18410,18830,18970,
 			 19390,19670]
+		);
+	}
+
+	private static function is_now(int $count): bool
+	{
+		// probably impossible to hit, so surely someone will in a few years
+		return $count == (
+			(new DateTime)->getTimestamp() -
+			(new DateTime('today'))
+				->setTimezone(new DateTimeZone('Pacific/Auckland'))
+				->getTimestamp()
 		);
 	}
 }
