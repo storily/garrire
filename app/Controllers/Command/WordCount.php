@@ -84,6 +84,7 @@ class WordCount extends \Controllers\Controller
 			if (round(log($count, 2)) == log($count, 2)) $deco .= '🤖';
 			if (static::is_prime($count)) $deco .= '🥇';
 			if (static::is_fibonacci($count)) $deco .= '🤌';
+			if (static::is_weird($count)) $deco .= '👾';
 
 			$deets = implode(', ', array_filter([
 				round($progress->percent, 2) . '% done',
@@ -166,5 +167,17 @@ class WordCount extends \Controllers\Controller
 	{
 		# https://en.wikipedia.org/wiki/Fibonacci_number#Identification
 		return static::is_square(5 * $count + 4) || static::is_square(5 * $count - 4);
+	}
+
+	private static function is_weird(int $count): bool
+	{
+		// https://oeis.org/A006037
+		return in_array($count,
+			[70,836,4030,5830,7192,7912,9272,10430,10570,
+			 10792,10990,11410,11690,12110,12530,12670,13370,
+			 13510,13790,13930,14770,15610,15890,16030,16310,
+			 16730,16870,17272,17570,17990,18410,18830,18970,
+			 19390,19670]
+		);
 	}
 }
