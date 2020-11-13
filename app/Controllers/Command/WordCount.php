@@ -77,13 +77,13 @@ class WordCount extends \Controllers\Controller
 			$goal = $novel->goal();
 			$progress = $novel->progress();
 
-			$deco = null;
-			if ($is_pal = Palindrome::is_pal($count)) $deco = '✨';
-			else if (preg_match('/^\d0+$/', "$count")) $deco = '💫';
-			else if (static::is_incrnum($count) || static::is_decrnum($count)) $deco = '🌌';
-			else if (round(log($count, 2)) == log($count, 2)) $deco = '🤖';
-			else if (static::is_prime($count)) $deco = '🥇';
-			else if (static::is_fibonacci($count)) $deco = '🤌';
+			$deco = '';
+			if ($is_pal = Palindrome::is_pal($count)) $deco .= '✨';
+			if (preg_match('/^\d0+$/', "$count")) $deco .= '💫';
+			if (static::is_incrnum($count) || static::is_decrnum($count)) $deco .= '🌌';
+			if (round(log($count, 2)) == log($count, 2)) $deco .= '🤖';
+			if (static::is_prime($count)) $deco .= '🥇';
+			if (static::is_fibonacci($count)) $deco .= '🤌';
 
 			$deets = implode(', ', array_filter([
 				round($progress->percent, 2) . '% done',
@@ -93,10 +93,10 @@ class WordCount extends \Controllers\Controller
 				($is_pal ? null : ((Palindrome::next($count) - $count) . ' to next pal')),
 			]));
 
-			if ($progress->percent >= 100) $deco ??= '🎆';
+			if ($progress->percent >= 100) $deco .= '🎆';
 
-			$deco ??= '';
-			$this->reply("“{$title}”: **{$deco}{$count}{$deco}** words ($deets)", null, true);
+			$oced = implode('', array_reverse(mb_str_split($deco)));
+			$this->reply("“{$title}”: **{$deco}{$count}{$oced}** words ($deets)", null, true);
 		} catch (\GuzzleHttp\Exception\ClientException $err) {
 			$res = $err->getResponse();
 			$this->reply("⚠️ Error: {$res->getStatusCode()} {$res->getReasonPhrase()}", null, true);
