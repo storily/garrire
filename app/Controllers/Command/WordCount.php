@@ -153,7 +153,7 @@ class WordCount extends \Controllers\Controller
 	{
         $intsqrt = floor(sqrt($count));
         for ($i = 2; $i <= $intsqrt; $i += 1)
-			if ($num % $i == 0) return false;
+			if ($count % $i == 0) return false;
 
 		return true;
 	}
