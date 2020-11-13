@@ -85,6 +85,8 @@ class WordCount extends \Controllers\Controller
 			if (static::is_prime($count)) $deco .= '🥇';
 			if (static::is_fibonacci($count)) $deco .= '🤌';
 			if (static::is_weird($count)) $deco .= '👾';
+			if (static::is_square($count)) $deco .= '🆒';
+			if (static::is_perfect($count)) $deco .= '💯';
 
 			$deets = implode(', ', array_filter([
 				round($progress->percent, 2) . '% done',
@@ -161,6 +163,12 @@ class WordCount extends \Controllers\Controller
 	private static function is_square(int $n): bool
 	{
 		return pow(floor(sqrt($n)), 2) == $n;
+	}
+
+	private static function is_perfect(int $count): bool
+	{
+		// https://oeis.org/A000396
+		return in_array($count, [6, 28, 496, 8128]);
 	}
 
 	private static function is_fibonacci(int $count): bool
