@@ -77,8 +77,11 @@ class WordCount extends \Controllers\Controller
 			$goal = $novel->goal();
 			$progress = $novel->progress();
 
-			$is_pal = Palindrome::is_pal($count);
-			$paldeco = $is_pal ? '✨' : '';
+			$deco = null;
+			if ($is_pal = Palindrome::is_pal($count)) $deco = '✨';
+			else if (preg_match('/^\d0+$/', "$count")) $deco = '💫';
+			else if (static::is_incrnum($count) || static::is_decrnum($count)) $deco = '🌌';
+			else if (round(log($count, 2)) == log($count, 2)) $deco = '🤖';
 
 			$deets = implode(', ', array_filter([
 				round($progress->percent, 2) . '% done',
@@ -88,7 +91,10 @@ class WordCount extends \Controllers\Controller
 				($is_pal ? null : ((Palindrome::next($count) - $count) . ' to next pal')),
 			]));
 
-			$this->reply("“{$title}”: **{$paldeco}{$count}{$paldeco}** words ($deets)", null, true);
+			if ($progress->percent >= 100) $deco ??= '🎆';
+
+			$deco ??= '';
+			$this->reply("“{$title}”: **{$deco}{$count}{$deco}** words ($deets)", null, true);
 		} catch (\GuzzleHttp\Exception\ClientException $err) {
 			$res = $err->getResponse();
 			$this->reply("⚠️ Error: {$res->getStatusCode()} {$res->getReasonPhrase()}", null, true);
@@ -120,5 +126,23 @@ class WordCount extends \Controllers\Controller
 		}
 
 		return static::numberk($diff) . " {$state}{$append}";
+	}
+
+	private static function is_incrnum(int $count): bool
+	{
+		foreach (str_split("$count") as $i => $n) {
+			if (((int) $n) !== ($i + 1)) return false;
+		}
+
+		return true;
+	}
+
+	private static function is_decrnum(int $count): bool
+	{
+		foreach (array_reverse(str_split("$count")) as $i => $n) {
+			if (((int) $n) !== ($i + 1)) return false;
+		}
+
+		return true;
 	}
 }

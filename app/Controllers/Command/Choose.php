@@ -22,7 +22,7 @@ class Choose extends \Controllers\Controller
 	if (in_array('write', $items)) $items[] = 'write';
 
 	if (count($items) == 1) {
-		$this->reply((rand(0, 1) ? '' : 'not ') . $items[0], null, true);
+		$this->reply((rand(0, 1) ? 'yes' : 'no'), null, true);
 	} else {
 	    $this->reply($items[array_rand($items)], null, true);
 	}
