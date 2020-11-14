@@ -39,11 +39,12 @@ class WordCount extends \Controllers\Controller
 
 		if (!empty($arg = $this->argument())) {
 			$args = preg_split('/\s+/', $arg);
-			switch (trim("{$args[0]} {$args[1]}")) {
+			switch (strtolower(trim("{$args[0]} {$args[1]}"))) {
 			case '':
 				break;
 
 			case 'set goal':
+			case 'add goal':
 				$novel = Novel::where('discord_user_id', $userid)->first();
 				if (!$novel) {
 					$this->reply('🛑 no novel set', null, true);
@@ -62,6 +63,7 @@ class WordCount extends \Controllers\Controller
 				break;
 
 			case 'unset goal':
+			case 'remove goal':
 				$novel = Novel::where('discord_user_id', $userid)->first();
 				if (!$novel) {
 					$this->reply('🛑 no novel set', null, true);
@@ -73,6 +75,7 @@ class WordCount extends \Controllers\Controller
 				break;
 
 			case 'set novel':
+			case 'add novel':
 				Novel::updateOrCreate(['discord_user_id' => $userid], ['novel' => $args[2] ?? $args[0]]);
 				break;
 
