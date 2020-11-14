@@ -87,32 +87,16 @@ class WordCount extends \Controllers\Controller
 			$goal = $novel->goal();
 			$progress = $novel->progress();
 
-			$deco = '';
-			if ($is_pal = Palindrome::is_pal($count)) $deco .= '✨';
-			if (preg_match('/^\d0+$/', "$count")) $deco .= '💫';
-			if (preg_match('/^\d+0{2,}$/', "$count")) $deco .= '🌻';
-			if (static::is_incrnum($count)) $deco .= '🌌';
-			if (round(log($count, 2)) == log($count, 2)) $deco .= '🤖';
-			if (static::is_prime($count)) $deco .= '🥇';
-			if (static::is_fibonacci($count)) $deco .= '🤌';
-			if (static::is_weird($count)) $deco .= '👾';
-			if (static::is_square($count)) $deco .= '🆒';
-			if (static::is_perfect($count)) $deco .= '💯';
-			if (static::is_now($count)) $deco .= '🕓';
-
 			$deets = implode(', ', array_filter([
 				round($progress->percent, 2) . '% done',
 				static::on_track($progress->today->diff ?? null, ' today'),
 				static::on_track($progress->live->diff ?? null, ' live'),
 				($goal == $novel->default_goal() ? null : (static::numberk($goal).' goal')),
-				($is_pal ? null : ((Palindrome::next($count) - $count) . ' to next pal')),
+				(Palindrome::is_pal($count) ? null : ((Palindrome::next($count) - $count) . ' to next pal')),
 			]));
 
-			if ($progress->percent >= 100) $deco .= '🎆';
-			if ($count == 0) $deco = '';
-
-			$oced = implode('', array_reverse(mb_str_split($deco)));
-			$this->reply("“{$title}”: **{$deco}{$count}{$oced}** words ($deets)", null, true);
+			$count = static::pretty($count, $progress->percent ?? null);
+			$this->reply("“{$title}”: **{$count}** words ($deets)", null, true);
 		} catch (\GuzzleHttp\Exception\ClientException $err) {
 			$res = $err->getResponse();
 			$this->reply("⚠️ Error: {$res->getStatusCode()} {$res->getReasonPhrase()}", null, true);
@@ -146,7 +130,34 @@ class WordCount extends \Controllers\Controller
 		return static::numberk($diff) . " {$state}{$append}";
 	}
 
-	public static function is_incrnum(int $count): bool
+	public static function pretty($count, ...$args): string
+	{
+		[$deco, $oced] = static::effects($count, ...$args);
+		return "{$deco}{$count}{$oced}";
+	}
+
+	public static function effects(int $count, ?float $percent = null): array
+	{
+		$deco = '';
+		if ($is_pal = Palindrome::is_pal($count)) $deco .= '✨';
+		if (preg_match('/^\d0+$/', "$count")) $deco .= '💫';
+		if (preg_match('/^\d+0{2,}$/', "$count")) $deco .= '🌻';
+		if (static::is_incrnum($count)) $deco .= '🌌';
+		if (round(log($count, 2)) == log($count, 2)) $deco .= '🤖';
+		if (static::is_prime($count)) $deco .= '🥇';
+		if (static::is_fibonacci($count)) $deco .= '🤌';
+		if (static::is_weird($count)) $deco .= '👾';
+		if (static::is_square($count)) $deco .= '🆒';
+		if (static::is_perfect($count)) $deco .= '💯';
+		if (static::is_now($count)) $deco .= '🕓';
+		if (!is_null($percent) and $percent >= 100) $deco .= '🎆';
+		if ($count <= 0) $deco = '';
+
+		$oced = implode('', array_reverse(mb_str_split($deco)));
+		return [$deco, $oced];
+	}
+
+	private static function is_incrnum(int $count): bool
 	{
 		$revrs = (int) implode('', array_reverse(str_split("$count")));
 		return static::is_incrnum_single($count, 0)
