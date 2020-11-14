@@ -138,11 +138,13 @@ class WordCount extends \Controllers\Controller
 
 	public static function effects(int $count, ?float $percent = null): array
 	{
+		$single_digit = strlen("$count") == 1;
+
 		$deco = '';
-		if ($is_pal = Palindrome::is_pal($count)) $deco .= '✨';
+		if (!$single_digit && Palindrome::is_pal($count)) $deco .= '✨';
 		if (preg_match('/^\d0+$/', "$count")) $deco .= '💫';
 		if (preg_match('/^\d+0{2,}$/', "$count")) $deco .= '🌻';
-		if (static::is_incrnum($count)) $deco .= '🌌';
+		if (!$single_digit && static::is_incrnum($count)) $deco .= '🌌';
 		if (round(log($count, 2)) == log($count, 2)) $deco .= '🤖';
 		if (static::is_prime($count)) $deco .= '🥇';
 		if (static::is_fibonacci($count)) $deco .= '🤌';
@@ -182,6 +184,7 @@ class WordCount extends \Controllers\Controller
 
 	private static function is_incrnum_single(int $count, int $offset = 0): bool
 	{
+		if (strlen("$count") == 1) return false;
 		foreach (str_split("$count") as $i => $n) {
 			if (((int) $n) !== ($i + 1 + $offset)) return false;
 		}
