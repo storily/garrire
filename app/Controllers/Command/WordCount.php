@@ -98,6 +98,7 @@ class WordCount extends \Controllers\Controller
 			]));
 
 			if ($progress->percent >= 100) $deco .= '🎆';
+			if ($count == 0) $deco = '';
 
 			$oced = implode('', array_reverse(mb_str_split($deco)));
 			$this->reply("“{$title}”: **{$deco}{$count}{$oced}** words ($deets)", null, true);
