@@ -90,6 +90,7 @@ class WordCount extends \Controllers\Controller
 			$deco = '';
 			if ($is_pal = Palindrome::is_pal($count)) $deco .= '✨';
 			if (preg_match('/^\d0+$/', "$count")) $deco .= '💫';
+			if (preg_match('/^\d+0{2,}$/', "$count")) $deco .= '🌻';
 			if (static::is_incrnum($count)) $deco .= '🌌';
 			if (round(log($count, 2)) == log($count, 2)) $deco .= '🤖';
 			if (static::is_prime($count)) $deco .= '🥇';
