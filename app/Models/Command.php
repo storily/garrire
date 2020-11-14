@@ -16,7 +16,7 @@ class Command extends Model
 	{
 		if ($this->mode != 'glob') return false;
 
-		$regex = '|^' . str_replace('/\*', '(?:/([^/]+))?', preg_quote($this->path)) . '$|';
+		$regex = '|^' . str_replace('/\*', '(?:/([^/]+))?', preg_quote($this->path)) . '$|i';
 
 		$path = rtrim($path, '/');
 		if (!preg_match($regex, $path, $matches)) return false;
