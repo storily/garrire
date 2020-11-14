@@ -194,7 +194,7 @@ class WordCount extends \Controllers\Controller
 	{
 		if (strlen("$count") == 1) return false;
 		foreach (str_split("$count") as $i => $n) {
-			if (((int) $n) !== ($i + 1 + $offset)) return false;
+			if (((int) $n) !== (($i + 1 + $offset) % 10)) return false;
 		}
 
 		return true;
