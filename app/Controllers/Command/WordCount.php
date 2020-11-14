@@ -73,8 +73,11 @@ class WordCount extends \Controllers\Controller
 				break;
 
 			case 'set novel':
-			default:
 				Novel::updateOrCreate(['discord_user_id' => $userid], ['novel' => $args[2] ?? $args[0]]);
+				break;
+
+			default:
+				$this->show_help();
 			}
 		}
 
