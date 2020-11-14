@@ -2,16 +2,26 @@
 
 /// wc (wordcount) - Get your wordcount from the nano website.
 ///
-/// You need to set your novel "ID" to setup. When you go to your
-/// your nanowrimo pages and open the main page for your project,
-/// the URL will look like `https://nanowrimo.org/participants/your-name/projects/some-name`.
-/// Your project ID is the `some-name` part. Copy just that and tell
-/// me about it with `!wc set novel some-name`.
+/// You need to set your novel to setup. The most straightforward
+/// way is with the project URL: when you go to your nanowrimo pages
+/// and open the main page for your novel, the URL will look like
+/// `https://nanowrimo.org/participants/your-name/projects/some-name`.
+/// Copy it and tell me about it with `!wc add novel URL`.
 ///
 /// Thereafter, get your wordcount and stats with `!wc`.
 ///
-/// During november, your goal is not editable on the site. You can
-/// override it here to get correct stats with `!wc set goal WORDS`.
+/// If you're writing multiple things at once you can add your other
+/// novels with more `!wc add novel NOVEL`, and remove some with
+/// `!wc remove novel NOVEL`, or clear everything with `!wc clear`.
+///
+/// The goal of novels assigned to the November event is not editable
+/// on the site. You can override it here to get correct stats with
+/// `!wc set goal NOVEL WORDS`.
+///
+/// In all commands above, the `NOVEL` identifier can either be the
+/// full URL or the last part of it after the slash or any part of
+/// the title which is unambiguous.
+
 
 declare(strict_types=1);
 namespace Controllers\Command;
@@ -80,7 +90,7 @@ class WordCount extends \Controllers\Controller
 			$deco = '';
 			if ($is_pal = Palindrome::is_pal($count)) $deco .= '✨';
 			if (preg_match('/^\d0+$/', "$count")) $deco .= '💫';
-			if (static::is_incrnum($count) || static::is_decrnum($count)) $deco .= '🌌';
+			if (static::is_incrnum($count)) $deco .= '🌌';
 			if (round(log($count, 2)) == log($count, 2)) $deco .= '🤖';
 			if (static::is_prime($count)) $deco .= '🥇';
 			if (static::is_fibonacci($count)) $deco .= '🤌';
@@ -135,19 +145,33 @@ class WordCount extends \Controllers\Controller
 		return static::numberk($diff) . " {$state}{$append}";
 	}
 
-	private static function is_incrnum(int $count): bool
+	public static function is_incrnum(int $count): bool
 	{
-		foreach (str_split("$count") as $i => $n) {
-			if (((int) $n) !== ($i + 1)) return false;
-		}
-
-		return true;
+		$revrs = (int) implode('', array_reverse(str_split("$count")));
+		return static::is_incrnum_single($count, 0)
+			|| static::is_incrnum_single($count, 1)
+			|| static::is_incrnum_single($count, 2)
+			|| static::is_incrnum_single($count, 3)
+			|| static::is_incrnum_single($count, 4)
+			|| static::is_incrnum_single($count, 5)
+			|| static::is_incrnum_single($count, 6)
+			|| static::is_incrnum_single($count, 7)
+			|| static::is_incrnum_single($count, 8)
+			|| static::is_incrnum_single($revrs, 8)
+			|| static::is_incrnum_single($revrs, 7)
+			|| static::is_incrnum_single($revrs, 6)
+			|| static::is_incrnum_single($revrs, 5)
+			|| static::is_incrnum_single($revrs, 4)
+			|| static::is_incrnum_single($revrs, 3)
+			|| static::is_incrnum_single($revrs, 2)
+			|| static::is_incrnum_single($revrs, 1)
+			|| static::is_incrnum_single($revrs, 0);
 	}
 
-	private static function is_decrnum(int $count): bool
+	private static function is_incrnum_single(int $count, int $offset = 0): bool
 	{
-		foreach (array_reverse(str_split("$count")) as $i => $n) {
-			if (((int) $n) !== ($i + 1)) return false;
+		foreach (str_split("$count") as $i => $n) {
+			if (((int) $n) !== ($i + 1 + $offset)) return false;
 		}
 
 		return true;
@@ -176,7 +200,7 @@ class WordCount extends \Controllers\Controller
 	private static function is_fibonacci(int $count): bool
 	{
 		# https://en.wikipedia.org/wiki/Fibonacci_number#Identification
-		return static::is_square(5 * $count + 4) || static::is_square(5 * $count - 4);
+		return static::is_square(5 * pow($count, 2) + 4) || static::is_square(5 * pow($count, 2) - 4);
 	}
 
 	private static function is_weird(int $count): bool
