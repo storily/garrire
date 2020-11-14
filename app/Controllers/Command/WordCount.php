@@ -141,6 +141,7 @@ class WordCount extends \Controllers\Controller
 		$single_digit = strlen("$count") == 1;
 
 		$deco = '';
+		if (preg_match('/^(\d)\1+$/', "$count")) $deco .= '🌉';
 		if (!$single_digit && Palindrome::is_pal($count)) $deco .= '✨';
 		if (preg_match('/^\d0+$/', "$count")) $deco .= '💫';
 		if (preg_match('/^\d+0{2,}$/', "$count")) $deco .= '🌻';
