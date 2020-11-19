@@ -76,7 +76,9 @@ class WordCount extends \Controllers\Controller
 
 			case 'set novel':
 			case 'add novel':
-				Novel::updateOrCreate(['discord_user_id' => $userid], ['novel' => $args[2] ?? $args[0]]);
+				$novel = $args[2];
+				if (str_starts_with($novel, 'https:')) $novel = last(explode('/', $novel));
+				Novel::updateOrCreate(['discord_user_id' => $userid], ['novel' => $novel]);
 				break;
 
 			default:
