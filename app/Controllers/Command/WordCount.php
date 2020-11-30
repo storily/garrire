@@ -97,8 +97,8 @@ class WordCount extends \Controllers\Controller
 
 			$deets = implode(', ', array_filter([
 				round($progress->percent, 2) . '% done',
-				static::on_track($progress->today->diff ?? null, ' today'),
-				static::on_track($progress->live->diff ?? null, ' live'),
+				($progress->percent >= 100 ? null : static::on_track($progress->today->diff ?? null, ' today')),
+				($progress->percent >= 100 ? null : static::on_track($progress->live->diff ?? null, ' live')),
 				($goal == $novel->default_goal() ? null : (static::numberk($goal).' goal')),
 				(Palindrome::is_pal($count) ? null : ((Palindrome::next($count) - $count) . ' to next pal')),
 			]));
