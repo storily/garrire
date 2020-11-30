@@ -71,9 +71,9 @@ class Novel extends Model
 	{
 		if (empty($goal['starts-at']) || empty($goal['ends-at'])) return true;
 
-		$start = new \DateTime($goal['starts-at']);
-		$end = new \DateTime($goal['ends-at']);
-		$now = new \DateTime;
+		$start = (new \DateTime($goal['starts-at']))->format('Y-m-d');
+		$end = (new \DateTime($goal['ends-at']))->format('Y-m-d');
+		$now = (new \DateTime)->format('Y-m-d');
 
 		return ($now >= $start && $now <= $end);
 	}
