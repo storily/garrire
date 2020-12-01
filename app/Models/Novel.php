@@ -61,10 +61,14 @@ class Novel extends Model
 
 	public function current_goals(): array
 	{
-		return array_filter(
-			$this->project_data()['goals'],
-			fn ($goal) => static::goal_is_current($goal)
-		);
+		$goals = $this->project_data()['goals'];
+		if (empty($goals)) return [];
+
+		$active = array_filter($goals, fn ($goal) => static::goal_is_current($goal));
+		if (!empty($active)) return $active;
+
+		usort($goals, fn ($a, $b) => $a['starts-at'] <=> $b['starts-at']);
+		return [$goals[0]];
 	}
 
 	private static function goal_is_current($goal): bool
@@ -93,10 +97,14 @@ class Novel extends Model
 	// words already accounted for in past goals
 	public function accounted_words(): int
 	{
-		$past_goals = array_filter(
-			$this->project_data()['goals'],
-			fn ($goal) => !static::goal_is_current($goal)
-		);
+		$goals = $this->project_data()['goals'];
+		if (empty($goals)) return 0;
+
+		$past_goals = array_filter($goals, fn ($goal) => !static::goal_is_current($goal));
+		if (count($past_goals) == count($goals)) {
+			usort($past_goals, fn ($a, $b) => $a['starts-at'] <=> $b['starts-at']);
+			array_shift($past_goals);
+		}
 
 		return array_sum(array_map(
 			fn ($goal) => $goal['current-count'],
