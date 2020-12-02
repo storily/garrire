@@ -44,10 +44,15 @@ class Novel extends Model
 
 	public function period(): object
 	{
+		$goal = $this->current_goal() ?? [
+			'starts-at' => '2020-11-01',
+			'ends-at' => '2020-11-30',
+		];
+
 		$tz = new \DateTimeZone('Pacific/Auckland');
 
-		$start = (new \DateTimeImmutable('1 Nov 2020'))->setTimezone($tz);
-		$finish = (new \DateTimeImmutable('1 Dec 2020'))->setTimezone($tz);
+		$start = (new \DateTimeImmutable($goal['starts-at']))->setTimezone($tz);
+		$finish = (new \DateTimeImmutable($goal['ends-at']))->setTimezone($tz)->modify('+1 day');
 		$now = (new \DateTimeImmutable)->setTimezone($tz);
 		$today = $now->setTime(0, 0, 0, 0)->setTimezone($tz);
 
@@ -71,6 +76,13 @@ class Novel extends Model
 		return [$goals[0]];
 	}
 
+	public function current_goal(): ?array
+	{
+		$goals = $this->current_goals();
+		usort($goals, fn ($a, $b) => $a['starts-at'] <=> $b['starts-at']);
+		return $goals[0] ?? null;
+	}
+
 	private static function goal_is_current($goal): bool
 	{
 		if (empty($goal['starts-at']) || empty($goal['ends-at'])) return true;
@@ -89,9 +101,7 @@ class Novel extends Model
 
 	public function default_goal(): int
 	{
-		$goals = array_map(fn ($goal) => $goal['goal'], $this->current_goals());
-		rsort($goals);
-		return $goals[0] ?? 50000;
+		return $this->current_goal()['goal'] ?? 50000;
 	}
 
 	// words already accounted for in past goals
