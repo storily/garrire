@@ -6,9 +6,11 @@
 /// to make with an `[M]`-sided die (default 6 sides). You can roll
 /// multiple dice at once, e.g. `1d20 2d10 3d5`. Sides don't have to make
 /// physical sense: a `d2` is possible, as is a `d1`, as is a `d1927362`.
+/// You can also add `+`, `-`, or `±` followed by a number to offset the
+/// result of each throw.
 ///
 /// You can append `#` followed by some label to have your label attached
-/// to the output (so you remember what it's for).
+/// to the output (so you remember what it’s for).
 
 declare(strict_types=1);
 namespace Controllers\Command;
@@ -26,16 +28,22 @@ class Roll extends \Controllers\Controller
 	$comment = trim($comment ?? '');
 
     foreach (preg_split('/\s+/', trim($args ?: 'd')) as $arg) {
-      if (!preg_match('/(\d*)d(\d*)/i', $arg, $matches)) {
+      if (!preg_match('/(\d*)d(\d*)((?:\+|-|±)\d+)?/iu', $arg, $matches)) {
         $this->show_help();
       }
 
       $rolls = ((int) $matches[1]) ?: 1;
       $sides = ((int) $matches[2]) ?: 6;
 
+	  $offset = $matches[3] ?: '+0';
+	  $offset_op = mb_substr($offset, 0, 1);
+	  if ($offset_op == '±') $offset_op = rand(0, 1) ? '+' : '-';
+	  $offset_op = $offset_op == '+' ? 1 : -1;
+	  $offset = (int) mb_substr($offset, 1);
+
       $throws = [];
       for ($i = 0; $i < $rolls; $i += 1) {
-        $throws[] = rand(1, $sides);
+        $throws[] = rand(1, $sides) + ($offset_op * $offset);
       }
 
       $total = array_sum($throws);
