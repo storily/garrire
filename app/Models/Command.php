@@ -62,6 +62,11 @@ class Command extends Model
 
 		$prefix = explode('/', $path)[1] ?? trim($path, '/');
 
+		if ($prefix == 'test') {
+			static::test($method, $path);
+			return;
+		}
+
 		$commands = self::query()
 			->where(fn ($q) => $q
 				->where('mode', '=', 'exact')
@@ -95,5 +100,18 @@ class Command extends Model
 		}
 
 		$instance->$method();
+	}
+
+	private static function test(string $method, string $path): void
+	{
+		dump($method, $path, json_decode(file_get_contents('php://input')));
+		http_response_code(200);
+		header('Content-Type:application/json');
+		echo json_encode([ "assign-role" => [
+			"role_id" => "715229409660895251",
+			"user_id" => "182887606340550656",
+			"reason" => "Requested with !badge"
+		] ]);
+		throw new \Exceptions\End;
 	}
 }
