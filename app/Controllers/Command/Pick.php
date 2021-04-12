@@ -10,7 +10,7 @@
 ///
 /// Specials: if you add any of the following words after a range or number,
 /// or on its own, you will obtain random items matching the category: `month`,
-/// `flower`, `food`, `colour`, `animal`, `season`, `gemstone`, `card`.
+/// `flower`, `food`, `colour`, `animal`, `season`, `gemstone`, `card`, `mood`.
 /// Plurals and some alternative spellings are also accepted.
 
 declare(strict_types=1);
@@ -38,6 +38,10 @@ class Pick extends \Controllers\Controller
 		'gemstones' => 'gemstone',
 		'month' => 'month',
 		'months' => 'month',
+		'mood' => 'mood',
+		'moods' => 'mood',
+		'emotion' => 'mood',
+		'emotions' => 'mood',
 		'season' => 'season',
 		'seasons' => 'season',
 		// 'fruit' => 'fruit',
