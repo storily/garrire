@@ -22,6 +22,7 @@ class Plot extends \Controllers\ApiController
 		$result = [];
 		foreach ($plots as $plot) {
 			$result[] = [
+				"id" => $plot->id,
 				"text" => $plot->text,
 				"author" => $plot->author,
 				"theme" => $plot->theme,
