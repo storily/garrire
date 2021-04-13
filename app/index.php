@@ -7,7 +7,9 @@ try {
 	$method = strtolower($_SERVER['REQUEST_METHOD']);
 	$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-	if (str_starts_with($path, '/command/')) {
+	if (str_starts_with($path, '/api/')) {
+		Models\ApiEndpoint::handle($method, preg_replace('|^/api|', '', $path));
+	} else if (str_starts_with($path, '/command/')) {
 		Models\Command::handle($method, preg_replace('|^/command|', '', $path));
 	} else if (preg_match('|^/server/\d+/join/\d+$|', $path)) {
 		(new Controllers\Membership)->join();
