@@ -154,8 +154,8 @@ class WordCount extends \Controllers\Controller
 		if (preg_match('/^(\d)\1+$/', "$count")) $deco .= '🌉';
 		if (preg_match('/^(\d)(\d)\2+\1$/', "$count")) $deco .= '🌆';
 		if (!$single_digit && Palindrome::is_pal($count)) $deco .= '✨';
-		else if (preg_match('/(\d{2})\1/', "$count")) $deco .= '💞';
-		else if (preg_match('/(\d)\1(\d)\2/', "$count")) $deco .= '👀';
+		else if (preg_match('/(\d)\1.*(\d)\2/', "$count")) $deco .= '👀';
+		else if (preg_match('/(\d{2}).*\1/', "$count")) $deco .= '💞';
 		if (preg_match('/^\d0+$/', "$count")) $deco .= '💫';
 		if (preg_match('/^\d+0{2,}$/', "$count")) $deco .= '🌻';
 		if (!$single_digit && static::is_incrnum($count)) $deco .= '🌌';
