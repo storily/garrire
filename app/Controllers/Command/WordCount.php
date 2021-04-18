@@ -39,6 +39,8 @@ class WordCount extends \Controllers\Controller
 		$userid = $_SERVER['HTTP_ACCORD_AUTHOR_ID'] ?? $_SERVER['HTTP_ACCORD_USER_ID'] ?? null;
 		if (!$userid) throw new \Exception('no user id, cannot proceed?!');
 
+		$debug = false;
+
 		if (!empty($arg = $this->argument())) {
 			$args = preg_split('/\s+/', $arg);
 			switch (strtolower(trim("{$args[0]} {$args[1]}"))) {
@@ -83,6 +85,10 @@ class WordCount extends \Controllers\Controller
 				Novel::updateOrCreate(['discord_user_id' => $userid], ['novel' => $novel]);
 				break;
 
+			case 'debug':
+				$debug = true;
+				break;
+
 			default:
 				$this->show_help();
 			}
@@ -104,6 +110,29 @@ class WordCount extends \Controllers\Controller
 				($goal == 50000 ? null : (static::numberk($goal).' goal')),
 				(Palindrome::is_pal($count) ? null : ((Palindrome::next($count) - $count) . ' to next pal')),
 			]));
+
+			if ($debug) {
+				$period = $novel->period();
+				$period = [
+					'start' => $period->start->format(\DateTime::RFC3339),
+					'finish' => $period->finish->format(\DateTime::RFC3339),
+					'now' => $period->now->format(\DateTime::RFC3339),
+					'today' => $period->today->format(\DateTime::RFC3339),
+
+					'length_days' => $period->length->days * ($period->length->invert ? -1 : 1),
+					'gone_days' => $period->gone->days * ($period->gone->invert ? -1 : 1),
+					'left_days' => $period->left->days * ($period->left->invert ? -1 : 1),
+
+					'length_hours' => $period->length->h,
+
+					'length_inverted' => !!$period->length->invert,
+					'gone_inverted' => !!$period->gone->invert,
+					'left_inverted' => !!$period->left->invert,
+
+					'over' => $period->over,
+				];
+				$deets .= "\n\n```\n".var_export(compact('title', 'count', 'goal', 'progress', 'period'), true)."\n```";
+			}
 
 			$count = static::pretty($count, $progress->percent ?? null);
 			$this->reply("“{$title}”: **{$count}** words ($deets)", null, true);

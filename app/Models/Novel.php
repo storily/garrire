@@ -56,10 +56,18 @@ class Novel extends Model
 		$now = (new \DateTimeImmutable)->setTimezone($tz);
 		$today = $now->setTime(0, 0, 0, 0)->setTimezone($tz);
 
-		$length = $finish->diff($start);
+		$length = $start->diff($finish);
 		$gone = $start->diff($now);
-		$left = $now->diff($start);
-		$over = $left <= 0;
+		$left = $now->diff($finish);
+
+		// Account for DST
+		if ($length->h < 0) {
+			$normalised_finish = $finish->add(new \DateInterval('PT' . abs($length->h) . 'H'));
+			$length = $start->diff($normalised_finish);
+			$left = $now->diff($normalised_finish);
+		}
+
+		$over = !!$left->invert;
 
 		return (object) compact('start', 'finish', 'now', 'today', 'length', 'gone', 'left', 'over');
 	}
