@@ -103,13 +103,12 @@ class WordCount extends \Controllers\Controller
 			$goal = $novel->goal();
 			$progress = $novel->progress();
 
-			$deets = implode(', ', array_filter([
+			$deets = [
 				round($progress->percent, 2) . '% done',
 				($progress->percent >= 100 ? null : static::on_track($progress->today->diff ?? null, ' today')),
 				($progress->percent >= 100 ? null : static::on_track($progress->live->diff ?? null, ' live')),
 				($goal == 50000 ? null : (static::numberk($goal).' goal')),
-				(Palindrome::is_pal($count) ? null : ((Palindrome::next($count) - $count) . ' to next pal')),
-			]));
+			];
 
 			if ($debug) {
 				$period = $novel->period();
@@ -131,10 +130,22 @@ class WordCount extends \Controllers\Controller
 
 					'over' => $period->over,
 				];
-				$deets .= "\n\n```\n".var_export(compact('title', 'count', 'goal', 'progress', 'period'), true)."\n```";
+				$deets[] = "\n```\n".var_export(compact('title', 'count', 'goal', 'progress', 'period'), true)."\n```\n";
 			}
 
-			$count = static::pretty($count, $progress->percent ?? null);
+			$pcount = static::pretty($count, $progress->percent ?? null);
+			if ($pcount == $count) {
+				$nextpal = Palindrome::next($count) - $count;
+				$nextpretty = static::next_pretty($count) - $count;
+
+				if ($nextpretty == $nextpal) {
+					$deets[] = "{$nextpal} to next pal";
+				} else {
+					$deets[] = "{$nextpretty}/{$nextpal} to next pretty/pal";
+				}
+			}
+
+			$deets = implode(', ', array_filter($deets));
 			$this->reply("“{$title}”: **{$count}** words ($deets)", null, true);
 		} catch (\GuzzleHttp\Exception\ClientException $err) {
 			$res = $err->getResponse();
@@ -173,6 +184,12 @@ class WordCount extends \Controllers\Controller
 	{
 		[$deco, $oced] = static::effects($count, ...$args);
 		return "{$deco}{$count}{$oced}";
+	}
+
+	public static function next_pretty(int $current): int
+	{
+		while (static::pretty(++$current) == $current) {}
+		return $current;
 	}
 
 	public static function effects(int $count, ?float $percent = null): array
