@@ -8,6 +8,8 @@
 /// `https://nanowrimo.org/participants/your-name/projects/some-name`.
 /// Copy it and tell me about it with `!wc add novel URL`.
 ///
+/// **Your novel needs to be public for me to see it.**
+///
 /// Thereafter, get your wordcount and stats with `!wc`.
 ///
 /// If you're writing multiple things at once you can add your other
