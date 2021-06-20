@@ -146,6 +146,7 @@ class WordCount extends \Controllers\Controller
 			}
 
 			$deets = implode(', ', array_filter($deets));
+			$count = $pcount;
 			$this->reply("“{$title}”: **{$count}** words ($deets)", null, true);
 		} catch (\GuzzleHttp\Exception\ClientException $err) {
 			$res = $err->getResponse();

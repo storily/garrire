@@ -59,6 +59,7 @@ class Novel extends Model
 		$length = $start->diff($finish);
 		$gone = $start->diff($now);
 		$left = $now->diff($finish);
+		$started = $start <= $now;
 
 		// Account for DST
 		if ($length->h < 0) {
@@ -69,7 +70,7 @@ class Novel extends Model
 
 		$over = !!$left->invert;
 
-		return (object) compact('start', 'finish', 'now', 'today', 'length', 'gone', 'left', 'over');
+		return (object) compact('start', 'finish', 'now', 'today', 'length', 'gone', 'left', 'over', 'started');
 	}
 
 	public function current_goals(): array
@@ -137,11 +138,13 @@ class Novel extends Model
 		$period = $this->period();
 
 		$per_day = ($goal / $period->length->days);
-		$goal_today = (int) round($per_day * ($period->gone->days + 1));
+		$goal_today = $period->started ? ((int) round($per_day * min($period->gone->days + 1, $period->length->days))) : 0;
 
 		$secs = $period->now->getTimestamp() - $period->today->getTimestamp();
 		$day_secs = 60*60*24;
-		$goal_live = (int) round($goal_today - $per_day * (($day_secs - $secs) / $day_secs));
+		$goal_live = $period->started ? ((int) round($goal_today - $per_day * (max(0, $day_secs - $secs) / $day_secs))) : 0;
+
+		$goal_live = min($goal_live, $goal_today);
 
 		return (object) [
 			'percent' => 100 * $count / $goal,
