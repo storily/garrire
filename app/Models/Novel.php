@@ -42,17 +42,25 @@ class Novel extends Model
 		return ($this->project_data()['unit-count'] ?? 0) - $this->accounted_words();
 	}
 
+	private static function dateInTz(string $date, \DateTimeZone $tz): \DateTimeImmutable
+	{
+		return (new \DateTimeImmutable($date))
+			->setTimezone($tz)
+			->setTime(0, 0, 0, 0)
+			->setTimezone($tz);
+	}
+
 	public function period(): object
 	{
 		$goal = $this->current_goal() ?? [
-			'starts-at' => '2020-11-01',
-			'ends-at' => '2020-11-30',
+			'starts-at' => '2021-11-01',
+			'ends-at' => '2021-11-30',
 		];
 
 		$tz = new \DateTimeZone('Pacific/Auckland');
 
-		$start = (new \DateTimeImmutable($goal['starts-at']))->setTimezone($tz);
-		$finish = (new \DateTimeImmutable($goal['ends-at']))->setTimezone($tz)->modify('+1 day');
+		$start = static::dateInTz($goal['starts-at'], $tz);
+		$finish = static::dateInTz($goal['ends-at'], $tz)->modify('+1 day');
 		$now = (new \DateTimeImmutable)->setTimezone($tz);
 		$today = $now->setTime(0, 0, 0, 0)->setTimezone($tz);
 
