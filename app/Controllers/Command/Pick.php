@@ -36,6 +36,8 @@ class Pick extends \Controllers\Controller
 		'gem' => 'gemstone',
 		'gemstone' => 'gemstone',
 		'gemstones' => 'gemstone',
+		'letter' => 'letter',
+		'letters' => 'letter',
 		'month' => 'month',
 		'months' => 'month',
 		'mood' => 'mood',
@@ -82,7 +84,6 @@ class Pick extends \Controllers\Controller
 
 		$picks = [];
 
-		// TODO: optimise to at most one query
 		foreach ($pickers as $p) {
 			if ($p->to !== null) {
 				$sorted = [$p->from, $p->to];
