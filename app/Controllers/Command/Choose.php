@@ -19,6 +19,13 @@ class Choose extends \Controllers\Controller
       preg_split('/\s+or\s+/i', $arg)
     );
 
+	if (str_contains($arg, ",") && count($items) == 1) {
+		$items = array_map(
+		  fn ($item) => trim($item),
+		  preg_split('/,\s*/i', $arg)
+		);
+	}
+
 	if (in_array('write', $items)) $items[] = 'write';
 
 	if (count($items) == 1) {
