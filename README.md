@@ -40,7 +40,7 @@ want, as long as I can make it run on the sassbot server.
 
  - Top level routing: Nginx.
 
- - PHP (7.4), via the FPM. I do PHP for my day job, so I'm super comfortable with
+ - PHP (8.0), via the FPM. I do PHP for my day job, so I'm super comfortable with
    it. Cool features: every request, ie. every command run, is isolated; standard
    library is large and ecosystem very mature; changes are live instantly.
 
@@ -53,3 +53,10 @@ want, as long as I can make it run on the sassbot server.
  - Automated testing: Node.js.
 
 more tbd
+
+## TODO
+
+- [ ] Fuck around with PHP's native ML and some datasets for character creation / autowriter
+   - https://github.com/nlx3647/dataset
+- [ ] Pull !ww into here somehow
+- [ ] Pull !name into here
