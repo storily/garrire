@@ -2,7 +2,7 @@
 
 /// choose - Choose between several items (separated by `or`).
 ///
-/// Separate items by the word `or`. One will be chosen at random.
+/// Separate items by the word `or`, or with commas. One will be chosen at random.
 
 declare(strict_types=1);
 namespace Controllers\Command;

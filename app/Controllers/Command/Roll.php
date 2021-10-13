@@ -4,13 +4,13 @@
 ///
 /// Notation is `[N]d[M]`, where `[N]` is the number of rolls (default 1)
 /// to make with an `[M]`-sided die (default 6 sides). You can roll
-/// multiple dice at once, e.g. `1d20 2d10 3d5`. Sides don't have to make
+/// multiple dice at once, e.g. `!roll 1d20 2d10 3d5`. Sides don't have to make
 /// physical sense: a `d2` is possible, as is a `d1`, as is a `d1927362`.
 /// You can also add `+`, `-`, or `±` followed by a number to offset the
 /// result of each throw.
 ///
 /// You can append `#` followed by some label to have your label attached
-/// to the output (so you remember what it’s for).
+/// to the output (so you remember what it’s for): `!roll d28 # day in feb`
 
 declare(strict_types=1);
 namespace Controllers\Command;
