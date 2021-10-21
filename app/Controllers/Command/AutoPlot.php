@@ -99,7 +99,7 @@ class AutoPlot extends \Controllers\Controller
 			->where("category", $cat)
 			->inRandomOrder()
 			->first()
-			->text;
+			->value;
 	}
 
 	public static function triple(): string
@@ -119,6 +119,6 @@ class AutoPlot extends \Controllers\Controller
 			->where("kind", $kind)
 			->inRandomOrder()
 			->first()
-			->text;
+			->value;
 	}
 }
