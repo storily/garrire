@@ -61,7 +61,7 @@ class AutoPlot extends \Controllers\Controller
 			['storied', 'mystery'],
 			['storied', 'romance'],
 			['storied', 'sci-fi'],
-			// ['triple', null],
+			['triple', null],
 		];
 		shuffle($set);
 		[$fn, $arg] = $set[0];
@@ -105,11 +105,10 @@ class AutoPlot extends \Controllers\Controller
 	public static function triple(): string
 	{
 		$genre = "generic";
-		return implode(' ', [
-			static::triple_one($genre, "place"),
-			static::triple_one($genre, "class"),
-			static::triple_one($genre, "time"),
-		]);
+		$place = static::triple_one($genre, "place");
+		$char = static::triple_one($genre, "character");
+		$action = static::triple_one($genre, "action");
+		return "In **{$place}**, **{$char}** will **{$action}**.";
 	}
 
 	private static function triple_one(string $genre, string $kind): string
