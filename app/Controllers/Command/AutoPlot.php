@@ -61,7 +61,7 @@ class AutoPlot extends \Controllers\Controller
 			['storied', 'mystery'],
 			['storied', 'romance'],
 			['storied', 'sci-fi'],
-			['triple', null],
+			// ['triple', null],
 		];
 		shuffle($set);
 		[$fn, $arg] = $set[0];
