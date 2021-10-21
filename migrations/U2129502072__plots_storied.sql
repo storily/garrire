@@ -5,5 +5,5 @@ CREATE TABLE `plots_storied` (
 	`category` VARCHAR(30) NOT NULL,
 	`value` TEXT NOT NULL,
 	PRIMARY KEY (`id`),
-	CONSTRAINT plots_storied_uniq UNIQUE (`genre`, `category`, `value`)
+	CONSTRAINT plots_storied_uniq UNIQUE (`genre`, `category`, `value` (200))
 );

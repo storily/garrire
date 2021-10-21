@@ -5,5 +5,5 @@ CREATE TABLE `plots_triple` (
 	`kind` VARCHAR(30) NOT NULL,
 	`value` TEXT NOT NULL,
 	PRIMARY KEY (`id`),
-	CONSTRAINT plots_triple_uniq UNIQUE (`genre`, `kind`, `value`)
+	CONSTRAINT plots_triple_uniq UNIQUE (`genre`, `kind`, `value` (200))
 );
