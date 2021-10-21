@@ -49,7 +49,7 @@ class AutoPlot extends \Controllers\Controller
 				default => static::storied($g),
 			};
 
-			$this->reply($plot);
+			$this->reply("($n) $plot");
 		}
 	}
 
