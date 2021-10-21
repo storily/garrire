@@ -55,14 +55,16 @@ class AutoPlot extends \Controllers\Controller
 
 	public static function random(): string
 	{
-		[$fn, $arg] = shuffle([
+		$set = [
 			['storied', 'drama'],
 			['storied', 'fantasy'],
 			['storied', 'mystery'],
 			['storied', 'romance'],
 			['storied', 'sci-fi'],
 			['triple', null],
-		])[0];
+		];
+		shuffle($set);
+		[$fn, $arg] = $set[0];
 
 		if ($arg) return static::$fn($arg);
 		else return static::$fn();
@@ -90,7 +92,7 @@ class AutoPlot extends \Controllers\Controller
 		]);
 	}
 
-	private function storied_cat(string $genre, string $cat): string
+	private static function storied_cat(string $genre, string $cat): string
 	{
 		return \Models\PlotStoried::query()
 			->where("genre", $genre)
@@ -110,7 +112,7 @@ class AutoPlot extends \Controllers\Controller
 		]);
 	}
 
-	private function triple_one(string $genre, string $kind): string
+	private static function triple_one(string $genre, string $kind): string
 	{
 		return \Models\PlotTriple::query()
 			->where("genre", $genre)
