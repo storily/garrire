@@ -30,7 +30,7 @@ class AutoPlot extends \Controllers\Controller
 		} else {
 			$items = array_map(
 			  fn ($item) => trim($item),
-			  preg_split('/,\s*/i', $arg)
+			  preg_split('/\s+/i', $arg)
 			);
 			[$n, $g] = match (count($items)) {
 				1 => [1, $items[0]],
