@@ -83,12 +83,12 @@ class AutoPlot extends \Controllers\Controller
 		$note = static::storied_cat($genre, "note");
 		$twist = static::storied_cat($genre, "twist");
 
-		return implode(' ', [
-			"Protagonist: {$protag}, who {$who_one}",
-			"Secondary character: {$second}, who {$who_two}",
-			"Plot: It's {$agenre} story about {$about} It kicks off {$begins} with {$plot}",
-			"(Note that: {$note})",
-			"And there's a twist! {$twist}",
+		return implode("\n", [
+			"**Protagonist**: {$protag}, who {$who_one}",
+			"**Secondary character**: {$second}, who {$who_two}",
+			"**Plot**: It's {$agenre} story about {$about} It kicks off {$begins} with {$plot}",
+			"_(Note that: {$note})_",
+			"And there's a **twist**! {$twist}",
 		]);
 	}
 
